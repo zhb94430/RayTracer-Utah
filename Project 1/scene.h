@@ -20,12 +20,12 @@
 
 #include <vector>
 
-#include "cyCodeBase-master/cyPoint.h"
+#include "cyPoint.h"
 typedef cyPoint2f Point2;
 typedef cyPoint3f Point3;
 typedef cyPoint4f Point4;
 
-#include "cyCodeBase-master/cyMatrix.h"
+#include "cyMatrix3.h"
 typedef cyMatrix3f Matrix3;
 
 typedef unsigned char uchar;
