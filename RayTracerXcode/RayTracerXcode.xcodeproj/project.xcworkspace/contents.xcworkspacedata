@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:/Users/Peter/Github Repos/RayTracer-Utah/RayTracerXocde/RayTracerXcode.xcodeproj">
+      location = "self:RayTracerXcode.xcodeproj">
    </FileRef>
 </Workspace>
