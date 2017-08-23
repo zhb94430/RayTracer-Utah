@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		D00107141F4E2D470056FD76 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D00107131F4E2D470056FD76 /* main.cpp */; };
-		D00107171F4E2D550056FD76 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107161F4E2D550056FD76 /* GLUT.framework */; };
-		D00107191F4E2D5B0056FD76 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107181F4E2D5B0056FD76 /* OpenGL.framework */; };
 		D001071D1F4E2D800056FD76 /* tinystr.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D001071C1F4E2D800056FD76 /* tinystr.o */; };
 		D001071F1F4E2D850056FD76 /* tinyxml.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D001071E1F4E2D850056FD76 /* tinyxml.o */; };
 		D00107211F4E2D880056FD76 /* tinyxmlerror.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107201F4E2D880056FD76 /* tinyxmlerror.o */; };
 		D00107231F4E2D8B0056FD76 /* tinyxmlparser.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */; };
+		D00107241F4E319F0056FD76 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107181F4E2D5B0056FD76 /* OpenGL.framework */; };
+		D00107251F4E31A30056FD76 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107161F4E2D550056FD76 /* GLUT.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,8 +46,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D00107191F4E2D5B0056FD76 /* OpenGL.framework in Frameworks */,
-				D00107171F4E2D550056FD76 /* GLUT.framework in Frameworks */,
+				D00107251F4E31A30056FD76 /* GLUT.framework in Frameworks */,
+				D00107241F4E319F0056FD76 /* OpenGL.framework in Frameworks */,
 				D001071D1F4E2D800056FD76 /* tinystr.o in Frameworks */,
 				D001071F1F4E2D850056FD76 /* tinyxml.o in Frameworks */,
 				D00107211F4E2D880056FD76 /* tinyxmlerror.o in Frameworks */,
