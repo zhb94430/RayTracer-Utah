@@ -2,16 +2,16 @@
 #include "ExternalLibrary/scene.h"
 #include "ExternalLibrary/xmlload.cpp"
 
-Camera camera;
-RenderImage renderImage;
-Sphere theSphere;
-Node rootNode;
 
+
+Camera camera = Camera();
+RenderImage renderImage = RenderImage();
+Sphere theSphere = Sphere();
+Node rootNode = Node();
 
 int main(int argc, const char* argv[]) 
 {
 	//Load Scene
-    LoadScene("Test");
     
 	//Perform Rendering
 

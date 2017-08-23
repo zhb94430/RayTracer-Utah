@@ -14,7 +14,6 @@
 		D0BBC6B81F4D282D00202009 /* tinystr.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D0BBC6B41F4D282D00202009 /* tinystr.o */; };
 		D0BBC6B91F4D282D00202009 /* tinyxmlerror.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D0BBC6B51F4D282D00202009 /* tinyxmlerror.o */; };
 		D0BBC6BA1F4D282D00202009 /* tinyxmlparser.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D0BBC6B61F4D282D00202009 /* tinyxmlparser.o */; };
-		D0BBC6BB1F4D282D00202009 /* xmltest.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D0BBC6B71F4D282D00202009 /* xmltest.o */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,7 +49,6 @@
 				D0BBC6B81F4D282D00202009 /* tinystr.o in Frameworks */,
 				D0BBC6B91F4D282D00202009 /* tinyxmlerror.o in Frameworks */,
 				D0BBC6BA1F4D282D00202009 /* tinyxmlparser.o in Frameworks */,
-				D0BBC6BB1F4D282D00202009 /* xmltest.o in Frameworks */,
 				D0BBC6B31F4D280A00202009 /* tinyxml.o in Frameworks */,
 				D0BBC6AF1F4D1EE200202009 /* OpenGL.framework in Frameworks */,
 				D0BBC6AD1F4D1EDE00202009 /* GLUT.framework in Frameworks */,
@@ -287,6 +285,7 @@
 				D0BBC6A71F4D1EAC00202009 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
