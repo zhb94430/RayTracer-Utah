@@ -231,6 +231,7 @@ public:
 	void			SetNodeObj(Object *object) { obj=object; }
 
 	// Transformations
+	// Transforming ray into model space
 	Ray ToNodeCoords( const Ray &ray ) const
 	{
 		Ray r;
