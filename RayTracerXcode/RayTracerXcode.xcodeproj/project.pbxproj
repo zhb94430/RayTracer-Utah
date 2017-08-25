@@ -30,8 +30,8 @@
 
 /* Begin PBXFileReference section */
 		D00107081F4E2D360056FD76 /* RayTracerXcode */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RayTracerXcode; sourceTree = BUILT_PRODUCTS_DIR; };
-		D00107121F4E2D470056FD76 /* ExternalLibrary */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ExternalLibrary; path = ../../ExternalLibrary; sourceTree = "<group>"; };
-		D00107131F4E2D470056FD76 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../main.cpp; sourceTree = "<group>"; };
+		D00107121F4E2D470056FD76 /* ExternalLibrary */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ExternalLibrary; path = ../ExternalLibrary; sourceTree = SOURCE_ROOT; };
+		D00107131F4E2D470056FD76 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../main.cpp; sourceTree = SOURCE_ROOT; };
 		D00107161F4E2D550056FD76 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		D00107181F4E2D5B0056FD76 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		D001071A1F4E2D670056FD76 /* tinyxml */ = {isa = PBXFileReference; lastKnownFileType = folder; name = tinyxml; path = ../ExternalLibrary/tinyxml; sourceTree = "<group>"; };
