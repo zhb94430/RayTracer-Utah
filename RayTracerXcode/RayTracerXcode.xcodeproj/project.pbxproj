@@ -14,6 +14,7 @@
 		D00107231F4E2D8B0056FD76 /* tinyxmlparser.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */; };
 		D00107241F4E319F0056FD76 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107181F4E2D5B0056FD76 /* OpenGL.framework */; };
 		D00107251F4E31A30056FD76 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107161F4E2D550056FD76 /* GLUT.framework */; };
+		D00107291F50AD980056FD76 /* RenderFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D00107281F50AD980056FD76 /* RenderFunctions.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,6 +40,7 @@
 		D001071E1F4E2D850056FD76 /* tinyxml.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxml.o; path = ../ExternalLibrary/tinyxml/tinyxml.o; sourceTree = "<group>"; };
 		D00107201F4E2D880056FD76 /* tinyxmlerror.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlerror.o; path = ../ExternalLibrary/tinyxml/tinyxmlerror.o; sourceTree = "<group>"; };
 		D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlparser.o; path = ../ExternalLibrary/tinyxml/tinyxmlparser.o; sourceTree = "<group>"; };
+		D00107281F50AD980056FD76 /* RenderFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderFunctions.cpp; path = ../../RenderFunctions.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +82,7 @@
 			children = (
 				D00107121F4E2D470056FD76 /* ExternalLibrary */,
 				D00107131F4E2D470056FD76 /* main.cpp */,
+				D00107281F50AD980056FD76 /* RenderFunctions.cpp */,
 			);
 			path = RayTracerXcode;
 			sourceTree = "<group>";
@@ -157,6 +160,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D00107141F4E2D470056FD76 /* main.cpp in Sources */,
+				D00107291F50AD980056FD76 /* RenderFunctions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
