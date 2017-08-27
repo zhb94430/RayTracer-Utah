@@ -14,7 +14,6 @@
 		D00107231F4E2D8B0056FD76 /* tinyxmlparser.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */; };
 		D00107241F4E319F0056FD76 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107181F4E2D5B0056FD76 /* OpenGL.framework */; };
 		D00107251F4E31A30056FD76 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107161F4E2D550056FD76 /* GLUT.framework */; };
-		D00107291F50AD980056FD76 /* RenderFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D00107281F50AD980056FD76 /* RenderFunctions.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -160,7 +159,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D00107141F4E2D470056FD76 /* main.cpp in Sources */,
-				D00107291F50AD980056FD76 /* RenderFunctions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,6 +258,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = MB28XTY8UD;
+				GCC_VERSION = "";
+				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -268,6 +268,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = MB28XTY8UD;
+				GCC_VERSION = "";
+				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -291,6 +293,7 @@
 				D00107111F4E2D360056FD76 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

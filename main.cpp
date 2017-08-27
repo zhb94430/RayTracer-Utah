@@ -1,7 +1,7 @@
 #include "ExternalLibrary/scene.h"
-#include "ExternalLibrary/xmlload.cpp"
 #include "ExternalLibrary/objects.h"
 #include "ExternalLibrary/viewport.cpp"
+#include "ExternalLibrary/xmlload.cpp"
 #include "RenderFunctions.cpp"
 
 Camera camera = Camera();

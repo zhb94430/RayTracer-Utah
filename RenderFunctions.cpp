@@ -6,9 +6,6 @@
 //  Copyright © 2017 Peter Zhang. All rights reserved.
 //
 
-#ifndef _RENDERF_INCLUDED_
-#define _RENDERF_INCLUDED_
-
 #include "ExternalLibrary/scene.h"
 #include "ExternalLibrary/objects.h"
 
@@ -146,5 +143,3 @@ Point3 CalculateCurrentPoint(int i, int j, int pixelOffsetX, int pixelOffsetY, P
     
     return result;
 }
-
-#endif
