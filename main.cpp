@@ -1,6 +1,7 @@
-#include "ExternalLibrary/objects.h"
 #include "ExternalLibrary/scene.h"
 #include "ExternalLibrary/xmlload.cpp"
+#include "ExternalLibrary/objects.h"
+#include "ExternalLibrary/viewport.cpp"
 #include "RenderFunctions.cpp"
 
 Camera camera = Camera();
@@ -8,20 +9,28 @@ RenderImage renderImage = RenderImage();
 Sphere theSphere = Sphere();
 Node rootNode = Node();
 
-bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
-{
-    return true;
+void BeginRender() {
+    
 }
 
+void StopRender() {
+    
+}
 
 int main(int argc, const char* argv[]) 
 {
+    const char* sceneFile;
+    
+    if (argc == 2) {
+        sceneFile = argv[1];
+    }
+    
 	//Load Scene
-    LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project1.xml");
+    LoadScene(sceneFile);
     
 	//Perform Rendering
     Render();
     
 	//Output Image
-    renderImage.SaveImage(<#const char *filename#>);
+//    renderImage.SaveImage("Result.png");
 }

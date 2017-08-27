@@ -20,7 +20,7 @@ extern RenderImage renderImage;
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, int pixelOffsetX, int pixelOffsetY, Point3 origin);
-HitInfo Trace(Ray r, Node* currentNode);
+void Trace(Ray r, Node* currentNode, HitInfo &hInfo);
 
 //Main Render Function
 void Render()
@@ -28,6 +28,7 @@ void Render()
     Point3 imgOrigin = CalculateImageOrigin(1.0);
     
     //For each pixel in img, generate ray from C
+    //TODO -- MULTITHREADING
     for (int i = 0; i < renderImage.GetWidth(); i++) {
         for (int j = 0; j < renderImage.GetHeight(); j++) {
             
@@ -35,9 +36,14 @@ void Render()
             Point3 currentPoint = CalculateCurrentPoint(i, j, 0.5, 0.5, imgOrigin);
             Ray r = Ray(imgOrigin, (currentPoint - camera.pos).GetNormalized());
             
+            HitInfo h;
+            
             //Trace ray with each object
+            Trace(r, &rootNode, h);
+            
+            
             //If hit, color white
-            if (Trace(r, &rootNode).node != nullptr) {
+            if (h.z > 0) {
                 renderImage.GetPixels()[(i+1)*(j+1)].r = 255;
                 renderImage.GetPixels()[(i+1)*(j+1)].g = 255;
                 renderImage.GetPixels()[(i+1)*(j+1)].b = 255;
@@ -53,24 +59,19 @@ void Render()
 }
 
 //Ray Tracing Logic
-
+//Recurse through all child nodes, intersect ray, fill in hitinfo
 //TODO-- Recursion, Model Space transformation
-HitInfo Trace(Ray r, Node* currentNode)
+void Trace(Ray r, Node* currentNode, HitInfo &hInfo)
 {
-    HitInfo h;
-    
     //If not at leaf, recurse
     if (currentNode->GetNumChild() > 0) {
         for (int i = 0; i < currentNode->GetNumChild(); i++) {
-            
+            Trace(r, currentNode->GetChild(i), hInfo);
         }
     }
     else {
-        currentNode->GetNodeObj()->IntersectRay(r, h);
+        currentNode->GetNodeObj()->IntersectRay(r, hInfo);
     }
-    
-    
-    return h;
 }
 
 //Sphere intersection
@@ -89,22 +90,31 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
         return false;
     }
     else if (sqrtCheck == 0) {
-        hInfo.z = (-b)/(2*a);
-        hInfo.front = true;
-        return true;
+        float z = (-b)/(2*a);
+        
+        if (z < hInfo.z) {
+            hInfo.z = z;
+            hInfo.front = true;
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     else {
         m = (-b+sqrtCheck)/(2*a);
         n = (-b-sqrtCheck)/(2*a);
         
-        if (m < n) {
+        if (m < n && m < hInfo.z) {
             hInfo.z = m;
+            hInfo.front = true;
+            return true;
         }
-        else {
+        else if (n < hInfo.z) {
             hInfo.z = n;
+            hInfo.front = true;
+            return true;
         }
-        hInfo.front = true;
-        return true;
     }
     
     return false;
