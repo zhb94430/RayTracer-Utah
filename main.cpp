@@ -2,6 +2,7 @@
 #include "ExternalLibrary/objects.h"
 #include "ExternalLibrary/viewport.cpp"
 #include "ExternalLibrary/xmlload.cpp"
+#include "ExternalLibrary/lodepng.cpp"
 #include "RenderFunctions.cpp"
 
 Camera camera = Camera();
@@ -32,5 +33,5 @@ int main(int argc, const char* argv[])
     Render();
     
 	//Output Image
-//    renderImage.SaveImage("Result.png");
+    renderImage.SaveImage("Result.png");
 }
