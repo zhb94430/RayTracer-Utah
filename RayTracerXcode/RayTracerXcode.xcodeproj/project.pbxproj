@@ -39,7 +39,7 @@
 		D001071E1F4E2D850056FD76 /* tinyxml.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxml.o; path = ../ExternalLibrary/tinyxml/tinyxml.o; sourceTree = "<group>"; };
 		D00107201F4E2D880056FD76 /* tinyxmlerror.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlerror.o; path = ../ExternalLibrary/tinyxml/tinyxmlerror.o; sourceTree = "<group>"; };
 		D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlparser.o; path = ../ExternalLibrary/tinyxml/tinyxmlparser.o; sourceTree = "<group>"; };
-		D00107281F50AD980056FD76 /* RenderFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderFunctions.cpp; path = ../../RenderFunctions.cpp; sourceTree = "<group>"; };
+		D00107281F50AD980056FD76 /* RenderFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderFunctions.cpp; path = ../RenderFunctions.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

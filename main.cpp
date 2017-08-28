@@ -36,4 +36,6 @@ int main(int argc, const char* argv[])
     
 	//Output Image
     renderImage.SaveImage("Result.png");
+    renderImage.ComputeZBufferImage();
+    renderImage.SaveZImage("ZBuffer.png");
 }
