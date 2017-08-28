@@ -18,7 +18,7 @@ float actualHeight, actualWidth;
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
-void Trace(Ray &r, Node* currentNode, HitInfo &hInfo);
+bool Trace(const Ray &r, Node* currentNode, HitInfo &hInfo);
 
 //Main Render Function
 void Render()
@@ -37,10 +37,12 @@ void Render()
             HitInfo h = HitInfo();
             
             //Trace ray with each object
-            Trace(r, &rootNode, h);
+            bool hitResult = Trace(r, &rootNode, h);
             
             //If hit, color white
-            if (h.z > 0 && h.z < BIGFLOAT) {
+            if (h.z > 0 && h.z < BIGFLOAT && h.node != NULL) {
+                renderImage.GetZBuffer()[i+renderImage.GetWidth()*j] = h.z;
+                
                 if (strcmp(h.node->GetName(), "sphere3") == 0) {
                     renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 255;
                     renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 0;
@@ -82,37 +84,26 @@ void Render()
 //Recurse through all child nodes,
 //If an object exist, intersect ray, fill in hitinfo
 //TODO-- Recursion, Model Space transformation
-void Trace(Ray& r, Node* currentNode, HitInfo& hInfo)
+bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
 {
+    bool currentNodeIsHit = false;
+    
     //If current node has an object, intersect and check children
     if (currentNode->GetNodeObj() != nullptr) {
-        //Save current hInfo value
-        float previousZ = hInfo.z;
-        
-        currentNode->GetNodeObj()->IntersectRay(currentNode->ToNodeCoords(r), hInfo);
-        
-        float newZ = (hInfo.z*r.dir).Length();
-        
-        //If new distance is smaller than previous one, use the new distance
-        if (newZ < previousZ) {
-            hInfo.z = newZ;
+        currentNodeIsHit = currentNode->GetNodeObj()->IntersectRay(currentNode->ToNodeCoords(r), hInfo);
+        if (currentNodeIsHit) {
             hInfo.node = currentNode;
         }
     }
     
-    //Reached leaf
-    if (currentNode->GetNumChild() <= 0) {
-        return;
-    }
-    
     //Keep testing children
-    else {
+    if (currentNode->GetNumChild() > 0) {
         for (int i = 0; i < currentNode->GetNumChild(); i++) {
-            Trace(r, currentNode->GetChild(i), hInfo);
+            currentNodeIsHit = currentNodeIsHit | Trace(currentNode->ToNodeCoords(r), currentNode->GetChild(i), hInfo);
         }
     }
     
-    return;
+    return currentNodeIsHit;
 }
 
 //Sphere intersection
