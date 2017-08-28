@@ -41,16 +41,36 @@ void Render()
             
             //If hit, color white
             if (h.z > 0 && h.z < BIGFLOAT) {
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 255;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 255;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 255;
-                renderImage.IncrementNumRenderPixel(1);
+                if (strcmp(h.node->GetName(), "sphere3") == 0) {
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 255;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 0;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 0;
+                    renderImage.IncrementNumRenderPixel(1);
+                }
+                else if (strcmp(h.node->GetName(), "sphere2") == 0){
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 0;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 255;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 0;
+                    renderImage.IncrementNumRenderPixel(1);
+                }
+                else if (strcmp(h.node->GetName(), "sphere1") == 0){
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 0;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 0;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 255;
+                    renderImage.IncrementNumRenderPixel(1);
+                }
+                else {
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 255;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 255;
+                    renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 255;
+                    renderImage.IncrementNumRenderPixel(1);
+                }
             }
             //Else, color black
             else {
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 100;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 0;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 0;
+                renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 50;
+                renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 50;
+                renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 50;
                 renderImage.IncrementNumRenderPixel(1);
             }
             
