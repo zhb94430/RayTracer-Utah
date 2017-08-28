@@ -161,7 +161,7 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
         return true;
     }
     else if (m < n) {
-        if (m <= 0) {
+        if (m <= 0 && n > 0) {
             hInfo.z = n;
             hInfo.front = false;
             return true;
@@ -173,7 +173,7 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
         }
     }
     else if (n < m) {
-        if (n <= 0) {
+        if (n <= 0 && m > 0) {
             hInfo.z = m;
             hInfo.front = false;
             return true;
