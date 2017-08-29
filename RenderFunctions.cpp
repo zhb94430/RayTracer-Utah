@@ -13,6 +13,9 @@
 extern Node rootNode;
 extern Camera camera;
 extern RenderImage renderImage;
+extern MaterialList materials;
+extern LightList lights;
+
 float actualHeight, actualWidth;
 
 //Prototypes

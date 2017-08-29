@@ -1,15 +1,21 @@
 #include "ExternalLibrary/scene.h"
 #include "ExternalLibrary/objects.h"
+#include "ExternalLibrary/materials.h"
+#include "ExternalLibrary/lights.h"
 #include "ExternalLibrary/viewport.cpp"
 #include "ExternalLibrary/xmlload.cpp"
 #include "ExternalLibrary/lodepng.cpp"
 #include "RenderFunctions.cpp"
 #include <thread>
 
-Camera camera = Camera();
+
+//Define & Init Data Stuctures
 RenderImage renderImage = RenderImage();
+Camera camera = Camera();
 Sphere theSphere = Sphere();
 Node rootNode = Node();
+MaterialList materials = MaterialList();
+LightList lights = LightList();
 
 void BeginRender() {
 //    std::thread(Render);
