@@ -45,7 +45,7 @@ void Render()
             //If hit, color white
             if (hitResult) {
                 renderImage.GetZBuffer()[i+renderImage.GetWidth()*j] = h.z;
-                
+
                 renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 255;
                 renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 255;
                 renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 255;
@@ -87,79 +87,6 @@ bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
     }
     
     return currentNodeIsHit;
-}
-
-//Sphere intersection
-bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
-{
-    float a,b,c,m,n,sqrtCheck;
-    
-    a = ray.dir.Dot(ray.dir);
-    b = 2*((ray.p - Point3(0,0,0)).Dot(ray.dir));
-    c = ray.p.Dot(ray.p) - 1;
-    
-    sqrtCheck = b*b-4*a*c;
-    
-//    //No Intersection
-//    if (sqrtCheck < 0) {
-//        return false;
-//    }
-//    else if (sqrtCheck == 0) {
-//        hInfo.z = -b/(2*a);
-//        hInfo.front = true;
-//        
-//        return true;
-//    }
-//    else {
-//        m = (-b+sqrt(sqrtCheck))/(2*a);
-//        n = (-b-sqrt(sqrtCheck))/(2*a);
-//        
-//        if (m < n) {
-//            hInfo.z = m;
-//            hInfo.front = true;
-//        }
-//        else {
-//            hInfo.z = n;
-//            hInfo.front = true;
-//        }
-//        
-//        return true;
-//    }
-    
-    m = (-b+sqrt(sqrtCheck))/(2*a);
-    n = (-b-sqrt(sqrtCheck))/(2*a);
-    
-    if (m == n) {
-        hInfo.z = m;
-        hInfo.front = true;
-        return true;
-    }
-    else if (m < n) {
-        if (m <= 0 && n > 0) {
-            hInfo.z = n;
-            hInfo.front = false;
-            return true;
-        }
-        else if (m > 0) {
-            hInfo.z = m;
-            hInfo.front = true;
-            return true;
-        }
-    }
-    else if (n < m) {
-        if (n <= 0 && m > 0) {
-            hInfo.z = m;
-            hInfo.front = false;
-            return true;
-        }
-        else if (n > 0) {
-            hInfo.z = n;
-            hInfo.front = true;
-            return true;
-        }
-    }
-    
-    return false;
 }
 
 

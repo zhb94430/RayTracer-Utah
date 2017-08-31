@@ -8,14 +8,18 @@
 #include "RenderFunctions.cpp"
 #include <thread>
 
+//TODO --------------
+// - Write Atomic Pixel Iterator
+// - Implement Multi-threading
+// - Implement all OpenGL interface
 
 //Define & Init Data Stuctures
-RenderImage renderImage = RenderImage();
-Camera camera = Camera();
-Sphere theSphere = Sphere();
-Node rootNode = Node();
-MaterialList materials = MaterialList();
-LightList lights = LightList();
+RenderImage renderImage;
+Camera camera;
+Sphere theSphere;
+Node rootNode;
+MaterialList materials;
+LightList lights;
 
 void BeginRender() {
 //    std::thread(Render);

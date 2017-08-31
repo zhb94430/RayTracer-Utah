@@ -14,6 +14,8 @@
 		D00107231F4E2D8B0056FD76 /* tinyxmlparser.o in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */; };
 		D00107241F4E319F0056FD76 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107181F4E2D5B0056FD76 /* OpenGL.framework */; };
 		D00107251F4E31A30056FD76 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00107161F4E2D550056FD76 /* GLUT.framework */; };
+		D00107301F57CC0F0056FD76 /* mtlFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */; };
+		D00107321F57CC240056FD76 /* objFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D00107311F57CC240056FD76 /* objFunctions.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,6 +42,8 @@
 		D00107201F4E2D880056FD76 /* tinyxmlerror.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlerror.o; path = ../ExternalLibrary/tinyxml/tinyxmlerror.o; sourceTree = "<group>"; };
 		D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlparser.o; path = ../ExternalLibrary/tinyxml/tinyxmlparser.o; sourceTree = "<group>"; };
 		D00107281F50AD980056FD76 /* RenderFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderFunctions.cpp; path = ../RenderFunctions.cpp; sourceTree = SOURCE_ROOT; };
+		D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mtlFunctions.cpp; path = ../../mtlFunctions.cpp; sourceTree = "<group>"; };
+		D00107311F57CC240056FD76 /* objFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = objFunctions.cpp; path = ../../objFunctions.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +86,8 @@
 				D00107121F4E2D470056FD76 /* ExternalLibrary */,
 				D00107131F4E2D470056FD76 /* main.cpp */,
 				D00107281F50AD980056FD76 /* RenderFunctions.cpp */,
+				D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */,
+				D00107311F57CC240056FD76 /* objFunctions.cpp */,
 			);
 			path = RayTracerXcode;
 			sourceTree = "<group>";
@@ -159,6 +165,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D00107141F4E2D470056FD76 /* main.cpp in Sources */,
+				D00107321F57CC240056FD76 /* objFunctions.cpp in Sources */,
+				D00107301F57CC0F0056FD76 /* mtlFunctions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +266,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = MB28XTY8UD;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "USE_GLUT=1";
 				GCC_VERSION = "";
 				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -268,6 +277,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = MB28XTY8UD;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "USE_GLUT=1";
 				GCC_VERSION = "";
 				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_NAME = "$(TARGET_NAME)";
