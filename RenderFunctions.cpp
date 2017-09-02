@@ -89,7 +89,11 @@ bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
     //Keep testing children
     if (currentNode->GetNumChild() > 0) {
         for (int i = 0; i < currentNode->GetNumChild(); i++) {
-            currentNodeIsHit = currentNodeIsHit | Trace(currentNode->ToNodeCoords(r), currentNode->GetChild(i), hInfo);
+            bool childIsHit = Trace(currentNode->ToNodeCoords(r), currentNode->GetChild(i), hInfo);
+            if (childIsHit) {
+                currentNode->FromNodeCoords(hInfo);
+            }
+            currentNodeIsHit = currentNodeIsHit | childIsHit;
         }
     }
     
