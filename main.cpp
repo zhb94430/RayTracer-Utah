@@ -6,6 +6,7 @@
 #include "ExternalLibrary/xmlload.cpp"
 #include "ExternalLibrary/lodepng.cpp"
 #include "RenderFunctions.cpp"
+#include "PixelIterator.h"
 #include <thread>
 
 //TODO --------------
@@ -38,10 +39,23 @@ int main(int argc, const char* argv[])
 //    }
     
 	//Load Scene
-    LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project1Example.xml");
+    LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project2.xml");
     
-    Render();
+    //Multi Thread Rendering
+    PixelIterator i = PixelIterator();
+    int CPUCoreNumber = std::thread::hardware_concurrency();
     
+    if (CPUCoreNumber == 0) {
+        CPUCoreNumber = 1;
+    }
+
+    for (int j = 0; j < CPUCoreNumber; j++) {
+        std::thread(Render, std::ref(i)).detach();
+    }
+    
+    while (!i.IterationComplete()) {
+        
+    }
 //    ShowViewport();
     
 	//Output Image

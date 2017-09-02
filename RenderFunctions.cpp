@@ -8,6 +8,7 @@
 
 #include "ExternalLibrary/scene.h"
 #include "ExternalLibrary/objects.h"
+#include "PixelIterator.h"
 
 //Variables
 extern Node rootNode;
@@ -18,49 +19,48 @@ extern LightList lights;
 
 float actualHeight, actualWidth;
 
+
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
 bool Trace(const Ray &r, Node* currentNode, HitInfo &hInfo);
 
 //Main Render Function
-void Render()
+void Render(PixelIterator& i)
 {
     Point3 imgOrigin = CalculateImageOrigin(1.0);
+    int x, y;
     
-    //For each pixel in img, generate ray from C
-    //TODO -- MULTITHREADING
-    for (int i = 0; i < renderImage.GetWidth(); i++) {
-        for (int j = 0; j < renderImage.GetHeight(); j++) {
-            
-            //Find current point and generate ray
-            Point3 currentPoint = CalculateCurrentPoint(i, j, 0.5, 0.5, imgOrigin);
-            Ray r = Ray(camera.pos, (currentPoint - camera.pos).GetNormalized());
-            
-            HitInfo h = HitInfo();
-            
-            //Trace ray with each object
-            bool hitResult = Trace(r, &rootNode, h);
-            
-            //If hit, color white
-            if (hitResult) {
-                renderImage.GetZBuffer()[i+renderImage.GetWidth()*j] = h.z;
-
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 255;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 255;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 255;
-                renderImage.IncrementNumRenderPixel(1);
-            }
-            //Else, color black
-            else {
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].r = 0;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].g = 0;
-                renderImage.GetPixels()[i+renderImage.GetWidth()*j].b = 0;
-                renderImage.IncrementNumRenderPixel(1);
-            }
-            
+    while (i.GetPixelLocation(x, y)) {
+        //Find current point and generate ray
+        Point3 currentPoint = CalculateCurrentPoint(x, y, 0.5, 0.5, imgOrigin);
+        Ray r = Ray(camera.pos, (currentPoint - camera.pos).GetNormalized());
+        
+        HitInfo h = HitInfo();
+        
+        //Trace ray with each object
+        bool hitResult = Trace(r, &rootNode, h);
+        
+        int imgArrayIndex = x+renderImage.GetWidth()*y;
+        renderImage.GetZBuffer()[imgArrayIndex] = h.z;
+        
+        //If hit, color white
+        if (hitResult) {
+            renderImage.GetPixels()[imgArrayIndex].r = 255;
+            renderImage.GetPixels()[imgArrayIndex].g = 255;
+            renderImage.GetPixels()[imgArrayIndex].b = 255;
+            renderImage.IncrementNumRenderPixel(1);
         }
+        //Else, color black
+        else {
+            renderImage.GetPixels()[imgArrayIndex].r = 0;
+            renderImage.GetPixels()[imgArrayIndex].g = 0;
+            renderImage.GetPixels()[imgArrayIndex].b = 0;
+            renderImage.IncrementNumRenderPixel(1);
+        }
+
     }
+    
 }
 
 //Ray Tracing Logic
@@ -88,7 +88,6 @@ bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
     
     return currentNodeIsHit;
 }
-
 
 //Calculate the origin of the image in world space
 Point3 CalculateImageOrigin(float distanceToImg)
@@ -118,3 +117,4 @@ Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffset
     
     return result;
 }
+

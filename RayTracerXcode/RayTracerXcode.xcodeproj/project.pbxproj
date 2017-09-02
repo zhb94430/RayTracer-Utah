@@ -42,8 +42,9 @@
 		D00107201F4E2D880056FD76 /* tinyxmlerror.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlerror.o; path = ../ExternalLibrary/tinyxml/tinyxmlerror.o; sourceTree = "<group>"; };
 		D00107221F4E2D8B0056FD76 /* tinyxmlparser.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = tinyxmlparser.o; path = ../ExternalLibrary/tinyxml/tinyxmlparser.o; sourceTree = "<group>"; };
 		D00107281F50AD980056FD76 /* RenderFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderFunctions.cpp; path = ../RenderFunctions.cpp; sourceTree = SOURCE_ROOT; };
-		D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mtlFunctions.cpp; path = ../../mtlFunctions.cpp; sourceTree = "<group>"; };
-		D00107311F57CC240056FD76 /* objFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = objFunctions.cpp; path = ../../objFunctions.cpp; sourceTree = "<group>"; };
+		D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mtlFunctions.cpp; path = ../mtlFunctions.cpp; sourceTree = SOURCE_ROOT; };
+		D00107311F57CC240056FD76 /* objFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = objFunctions.cpp; path = ../objFunctions.cpp; sourceTree = SOURCE_ROOT; };
+		D0B9C0641F5A26DE008D6919 /* PixelIterator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PixelIterator.h; path = ../PixelIterator.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +89,7 @@
 				D00107281F50AD980056FD76 /* RenderFunctions.cpp */,
 				D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */,
 				D00107311F57CC240056FD76 /* objFunctions.cpp */,
+				D0B9C0641F5A26DE008D6919 /* PixelIterator.h */,
 			);
 			path = RayTracerXcode;
 			sourceTree = "<group>";
