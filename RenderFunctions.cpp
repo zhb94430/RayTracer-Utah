@@ -45,15 +45,15 @@ void Render(PixelIterator& i)
         int imgArrayIndex = x+renderImage.GetWidth()*y;
         renderImage.GetZBuffer()[imgArrayIndex] = h.z;
         
-        
-        
         //If hit, color white
         if (hitResult) {
             Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights);
             
-            renderImage.GetPixels()[imgArrayIndex].r = pixelValues.r;
-            renderImage.GetPixels()[imgArrayIndex].g = pixelValues.g;
-            renderImage.GetPixels()[imgArrayIndex].b = pixelValues.b;
+            pixelValues.ClampMinMax();
+            
+            renderImage.GetPixels()[imgArrayIndex].r = pixelValues.r * 255;
+            renderImage.GetPixels()[imgArrayIndex].g = pixelValues.g * 255;
+            renderImage.GetPixels()[imgArrayIndex].b = pixelValues.b * 255;
             renderImage.IncrementNumRenderPixel(1);
         }
         //Else, color black
@@ -83,7 +83,6 @@ bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
             hInfo.node = currentNode;
             //Convert everything back to world coord
             currentNode->FromNodeCoords(hInfo);
-            hInfo.N = hInfo.N.GetNormalized();
         }
     }
     

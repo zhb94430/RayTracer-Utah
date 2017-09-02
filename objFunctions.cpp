@@ -24,19 +24,19 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
     m = (-b+sqrt(sqrtCheck))/(2*a);
     n = (-b-sqrt(sqrtCheck))/(2*a);
     
-    if (m == n) {
-        hInfo.z = m;
-        hInfo.front = true;
-        
-        Point3 temp = ray.p + hInfo.z * ray.dir;
-        
-        hInfo.N = temp.GetNormalized();
-        hInfo.p = temp;
-        
-        return true;
+    if (m == n && m < hInfo.z) {
+            hInfo.z = m;
+            hInfo.front = true;
+            
+            Point3 temp = ray.p + hInfo.z * ray.dir;
+            
+            hInfo.N = temp.GetNormalized();
+            hInfo.p = temp;
+            
+            return true;
     }
-    else if (m < n) {
-        if (m <= 0 && n > 0) {
+    else if (m < n  && m < hInfo.z) {
+        if (m <= 0 && n > 0 && n < hInfo.z) {
             hInfo.z = n;
             hInfo.front = false;
         }
@@ -52,8 +52,8 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
         
         return true;
     }
-    else if (n < m) {
-        if (n <= 0 && m > 0) {
+    else if (n < m && n < hInfo.z) {
+        if (n <= 0 && m > 0 && m < hInfo.z) {
             hInfo.z = m;
             hInfo.front = false;
         }

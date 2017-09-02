@@ -8,4 +8,3 @@
 
 #include "ExternalLibrary/lights.h"
 #include "ExternalLibrary/scene.h"
-
