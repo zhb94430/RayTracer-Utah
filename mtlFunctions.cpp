@@ -32,8 +32,18 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             Point3 lightDirection = (-(currentLight->Direction(hInfo.p))).GetNormalized();
             Point3 halfVector = (viewDirection+lightDirection).GetNormalized();
             
+            float NDotL = hInfo.N.Dot(lightDirection);
+            float NDotH = hInfo.N.Dot(halfVector);
             
-            result += currentLight->Illuminate(hInfo.p, hInfo.N)*(hInfo.N.Dot(lightDirection))*(diffuse+specular*pow(hInfo.N.Dot(halfVector), glossiness));
+            if (NDotL < 0.0) {
+                NDotL = 0.0;
+            }
+            
+            if (NDotH < 0.0) {
+                NDotH = 0.0;
+            }
+            
+            result += currentLight->Illuminate(hInfo.p, hInfo.N)*NDotL*(diffuse+specular*pow(NDotH, glossiness));
         }
     }
     
