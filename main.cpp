@@ -22,24 +22,6 @@ MaterialList materials;
 LightList lights;
 
 void BeginRender() {
-//    std::thread(Render);
-}
-
-void StopRender() {
-    
-}
-
-int main(int argc, const char* argv[]) 
-{
-//    const char* sceneFile;
-//    
-//    if (argc == 2) {
-//        sceneFile = argv[1];
-//    }
-    
-	//Load Scene
-    LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project2.xml");
-    
     //Multi Thread Rendering
     PixelIterator i = PixelIterator();
     int CPUCoreNumber = std::thread::hardware_concurrency();
@@ -50,7 +32,7 @@ int main(int argc, const char* argv[])
     
     //DEBUG PURPOSE
     CPUCoreNumber = 1;
-
+    
     for (int j = 0; j < CPUCoreNumber; j++) {
         std::thread(Render, std::ref(i)).detach();
     }
@@ -58,10 +40,29 @@ int main(int argc, const char* argv[])
     while (!i.IterationComplete()) {
         
     }
-//    ShowViewport();
     
-	//Output Image
+    //Output Image
     renderImage.SaveImage("Result.png");
     renderImage.ComputeZBufferImage();
     renderImage.SaveZImage("ZBuffer.png");
+}
+
+void StopRender() {
+    
+}
+
+int main(int argc, const char* argv[]) 
+{
+    const char* sceneFile;
+    
+    if (argc == 2) {
+        sceneFile = argv[1];
+        LoadScene(sceneFile);
+    }
+    //Load default scene if no sceneFile provided
+    else {
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project2.xml");
+    }
+    
+    ShowViewport();
 }
