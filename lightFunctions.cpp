@@ -8,3 +8,7 @@
 
 #include "ExternalLibrary/lights.h"
 #include "ExternalLibrary/scene.h"
+
+float GenLight::Shadow(Ray ray, float t_max) {
+    return 1.0;
+}
