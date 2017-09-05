@@ -5,10 +5,10 @@
 //  Created by Peter Zhang on 8/25/17.
 //  Copyright © 2017 Peter Zhang. All rights reserved.
 //
-
 #include "ExternalLibrary/scene.h"
 #include "ExternalLibrary/objects.h"
 #include "PixelIterator.h"
+#include "RenderFunctions.h"
 
 //Variables
 extern Node rootNode;
@@ -19,11 +19,10 @@ extern LightList lights;
 
 float actualHeight, actualWidth;
 
-
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
-bool Trace(const Ray &r, Node* currentNode, HitInfo &hInfo);
+
 
 //Main Render Function
 void Render(PixelIterator& i)

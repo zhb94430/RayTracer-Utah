@@ -45,6 +45,7 @@
 		D00107281F50AD980056FD76 /* RenderFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderFunctions.cpp; path = ../RenderFunctions.cpp; sourceTree = SOURCE_ROOT; };
 		D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mtlFunctions.cpp; path = ../mtlFunctions.cpp; sourceTree = SOURCE_ROOT; };
 		D00107311F57CC240056FD76 /* objFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = objFunctions.cpp; path = ../objFunctions.cpp; sourceTree = SOURCE_ROOT; };
+		D057C4781F5F426B00344B39 /* RenderFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RenderFunctions.h; path = ../RenderFunctions.h; sourceTree = SOURCE_ROOT; };
 		D0A3C1831F5A520700652635 /* lightFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lightFunctions.cpp; path = ../lightFunctions.cpp; sourceTree = SOURCE_ROOT; };
 		D0B9C0641F5A26DE008D6919 /* PixelIterator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PixelIterator.h; path = ../PixelIterator.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -86,6 +87,7 @@
 		D001070A1F4E2D360056FD76 /* RayTracerXcode */ = {
 			isa = PBXGroup;
 			children = (
+				D057C4781F5F426B00344B39 /* RenderFunctions.h */,
 				D00107121F4E2D470056FD76 /* ExternalLibrary */,
 				D00107131F4E2D470056FD76 /* main.cpp */,
 				D00107281F50AD980056FD76 /* RenderFunctions.cpp */,
