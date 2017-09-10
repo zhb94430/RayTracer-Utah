@@ -30,8 +30,10 @@ void BeginRender() {
         CPUCoreNumber = 1;
     }
     
+#ifdef DEBUG
     //DEBUG PURPOSE
     CPUCoreNumber = 1;
+#endif
     
     for (int j = 0; j < CPUCoreNumber; j++) {
         std::thread(Render, std::ref(i)).detach();

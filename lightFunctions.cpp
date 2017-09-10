@@ -16,18 +16,15 @@ extern LightList lights;
 float GenLight::Shadow(Ray ray, float t_max) {
     HitInfo h;
     h.z = t_max;
-    Ray jitteredRay = Ray(ray.p, ray.dir);
     
+    Ray modifiedRay = Ray(ray);
+    modifiedRay.p += (0.001) * modifiedRay.dir;
     
-    if (Trace(jitteredRay, &rootNode, h)) {
-        
-        if (h.z < t_max && h.z > 0.001) {
+    if (Trace(modifiedRay, &rootNode, h)) {
+        if (h.z > 0) {
             return 0.0;
         }
-        
-        return 1.0;
     }
-    else {
-        return 1.0;
-    }
+
+    return 1.0;
 }
