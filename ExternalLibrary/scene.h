@@ -25,7 +25,7 @@ typedef cyPoint2f Point2;
 typedef cyPoint3f Point3;
 typedef cyPoint4f Point4;
 
-#include "cyMatrix3.h"
+#include "cyMatrix.h"
 typedef cyMatrix3f Matrix3;
 
 #include "cyColor.h"

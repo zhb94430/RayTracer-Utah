@@ -13,7 +13,7 @@
 
 extern Camera camera;
 
-Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights) const
+Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const
 {
     Color result = Color(0,0,0);
     
@@ -46,18 +46,6 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             result += currentLight->Illuminate(hInfo.p, hInfo.N)*NDotL*(diffuse+specular*pow(NDotH, glossiness));
         }
     }
-    
-//    if (strcmp(hInfo.node->GetName(), "sphere1") == 0) {
-//        result = Color(255,0,0);
-//    }
-//    
-//    if (strcmp(hInfo.node->GetName(), "sphere2") == 0) {
-//        result = Color(0,255,0);
-//    }
-//    
-//    if (strcmp(hInfo.node->GetName(), "sphere3") == 0) {
-//        result = Color(0,0,255);
-//    }
     
     return result;
 }
