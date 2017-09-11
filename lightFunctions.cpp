@@ -18,7 +18,7 @@ float GenLight::Shadow(Ray ray, float t_max) {
     h.z = t_max;
     
     Ray modifiedRay = Ray(ray);
-    modifiedRay.p += (0.001) * modifiedRay.dir;
+//    modifiedRay.p += (0.001) * modifiedRay.dir;
     
     if (Trace(modifiedRay, &rootNode, h)) {
         if (h.z > 0) {
