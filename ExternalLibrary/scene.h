@@ -2,8 +2,8 @@
 ///
 /// \file       scene.h 
 /// \author     Cem Yuksel (www.cemyuksel.com)
-/// \version    2.0
-/// \date       August 28, 2017
+/// \version    4.0
+/// \date       September 17, 2015
 ///
 /// \brief Example source for CS 6620 - University of Utah.
 ///
@@ -19,16 +19,13 @@
 #include <math.h>
 
 #include <vector>
-#include <atomic>
-
-#include "lodepng.h"
 
 #include "cyPoint.h"
 typedef cyPoint2f Point2;
 typedef cyPoint3f Point3;
 typedef cyPoint4f Point4;
 
-#include "cyMatrix.h"
+#include "cyMatrix3.h"
 typedef cyMatrix3f Matrix3;
 
 #include "cyColor.h"
@@ -218,7 +215,7 @@ public:
 	// The main method that handles the shading by calling all the lights in the list.
 	// ray: incoming ray,
 	// hInfo: hit information for the point that is being shaded, lights: the light list,
-	virtual Color Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights) const=0;
+	virtual Color Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const=0;
 
 	virtual void SetViewportMaterial(int subMtlID=0) const {}	// used for OpenGL display
 };
@@ -320,7 +317,7 @@ private:
 	float	*zbuffer;
 	uchar	*zbufferImg;
 	int		width, height;
-	std::atomic<int> numRenderedPixels;
+	int		numRenderedPixels;
 public:
 	RenderImage() : img(NULL), zbuffer(NULL), zbufferImg(NULL), width(0), height(0), numRenderedPixels(0) {}
 	void Init(int w, int h)
@@ -344,7 +341,7 @@ public:
 
 	void	ResetNumRenderedPixels()		{ numRenderedPixels=0; }
 	int		GetNumRenderedPixels() const	{ return numRenderedPixels; }
-	void	IncrementNumRenderPixel(int n)	{ numRenderedPixels+=n; }
+	void	IncrementNumRenderPixel(int n)	{ numRenderedPixels+=n; }	// not thread-safe
 	bool	IsRenderDone() const			{ return numRenderedPixels >= width*height; }
 
 	void	ComputeZBufferImage()
@@ -371,20 +368,44 @@ public:
 		}
 	}
 
-	bool SaveImage (const char *filename) const { return SavePNG(filename,&img[0].r,3); }
-	bool SaveZImage(const char *filename) const { return SavePNG(filename,zbufferImg,1); }
+	bool SaveImage (const char *filename, bool flipped=false) const { return SavePPM(filename,&img[0].r,3,flipped); }
+	bool SaveZImage(const char *filename, bool flipped=false) const { return SavePPM(filename,zbufferImg,1,flipped); }
 
 private:
-	bool SavePNG(const char *filename, uchar *data, int compCount) const
+	bool SavePPM(const char *filename, uchar *data, int compCount, bool flipped) const
 	{
-		LodePNGColorType colortype;
+		FILE *fp = fopen(filename,"wb");
+		if ( !fp ) return false;
+		fprintf(fp,"P6\n%d %d\n255\n", width, height);
 		switch( compCount ) {
-			case 1: colortype = LCT_GREY; break;
-			case 3: colortype = LCT_RGB;  break;
-			default: return false;
+		case 1:
+			if ( flipped ) {
+				for ( int y=height-1; y>=0; y-- ) {
+					int i = y*width;
+					for ( int x=0; x<width; x++, i++ ) {
+						uchar d[3] = { data[i], data[i], data[i] };
+						fwrite(d,3,1,fp);
+					}
+				}
+			} else {
+				for ( int i=0; i<width*height; i++ ) {
+					uchar d[3] = { data[i], data[i], data[i] };
+					fwrite(d,3,1,fp);
+				}
+			}
+			break;
+		case 3:
+			if ( flipped ) {
+				for ( int y=height-1; y>=0; y-- ) {
+					fwrite(&data[y*width*3],3,width,fp);
+				}
+			} else {
+				fwrite(data,3,width*height,fp);
+			}
+			break;
 		}
-		unsigned int error = lodepng::encode(filename,data,width,height,colortype,8);
-		return error == 0;
+		fclose(fp);
+		return true;
 	}
 };
 
