@@ -63,7 +63,7 @@ int main(int argc, const char* argv[])
     }
     //Load default scene if no sceneFile provided
     else {
-        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project3Box.xml");
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project4.xml");
     }
     
     ShowViewport();
