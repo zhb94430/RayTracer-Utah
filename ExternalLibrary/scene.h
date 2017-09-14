@@ -3,7 +3,7 @@
 /// \file       scene.h 
 /// \author     Cem Yuksel (www.cemyuksel.com)
 /// \version    4.0
-/// \date       September 17, 2015
+/// \date       September 1, 2017
 ///
 /// \brief Example source for CS 6620 - University of Utah.
 ///
@@ -19,6 +19,9 @@
 #include <math.h>
 
 #include <vector>
+#include <atomic>
+
+#include "lodepng.h"
 
 #include "cyPoint.h"
 typedef cyPoint2f Point2;
@@ -76,10 +79,9 @@ struct HitInfo
 	Point3 N;			// surface normal at the hit point
 	const Node *node;	// the object node that was hit
 	bool front;			// true if the ray hits the front side, false if the ray hits the back side
-	int mtlID;			// sub-material index
 
 	HitInfo() { Init(); }
-	void Init() { z=BIGFLOAT; node=NULL; front=true; mtlID=0; }
+	void Init() { z=BIGFLOAT; node=NULL; front=true; }
 };
 
 //-------------------------------------------------------------------------------
@@ -261,7 +263,7 @@ public:
 	Node*		GetChild(int i)				{ return child[i]; }
 	void		SetChild(int i, Node *node)	{ child[i]=node; }
 	void		AppendChild(Node *node)		{ SetNumChild(numChild+1,true); SetChild(numChild-1,node); }
-	void		RemoveChild(int i)			{ for ( int j=i; j<numChild-1; j++) child[j]=child[j-1]; SetNumChild(numChild-1); }
+	void		RemoveChild(int i)			{ for ( int j=i; j<numChild-1; j++) child[j]=child[j+1]; SetNumChild(numChild-1); }
 	void		DeleteAllChildNodes()		{ for ( int i=0; i<numChild; i++ ) { child[i]->DeleteAllChildNodes(); delete child[i]; } SetNumChild(0); }
 
 	// Object management
@@ -317,7 +319,7 @@ private:
 	float	*zbuffer;
 	uchar	*zbufferImg;
 	int		width, height;
-	int		numRenderedPixels;
+	std::atomic<int> numRenderedPixels;
 public:
 	RenderImage() : img(NULL), zbuffer(NULL), zbufferImg(NULL), width(0), height(0), numRenderedPixels(0) {}
 	void Init(int w, int h)
@@ -341,7 +343,7 @@ public:
 
 	void	ResetNumRenderedPixels()		{ numRenderedPixels=0; }
 	int		GetNumRenderedPixels() const	{ return numRenderedPixels; }
-	void	IncrementNumRenderPixel(int n)	{ numRenderedPixels+=n; }	// not thread-safe
+	void	IncrementNumRenderPixel(int n)	{ numRenderedPixels+=n; }
 	bool	IsRenderDone() const			{ return numRenderedPixels >= width*height; }
 
 	void	ComputeZBufferImage()
@@ -368,44 +370,20 @@ public:
 		}
 	}
 
-	bool SaveImage (const char *filename, bool flipped=false) const { return SavePPM(filename,&img[0].r,3,flipped); }
-	bool SaveZImage(const char *filename, bool flipped=false) const { return SavePPM(filename,zbufferImg,1,flipped); }
+	bool SaveImage (const char *filename) const { return SavePNG(filename,&img[0].r,3); }
+	bool SaveZImage(const char *filename) const { return SavePNG(filename,zbufferImg,1); }
 
 private:
-	bool SavePPM(const char *filename, uchar *data, int compCount, bool flipped) const
+	bool SavePNG(const char *filename, uchar *data, int compCount) const
 	{
-		FILE *fp = fopen(filename,"wb");
-		if ( !fp ) return false;
-		fprintf(fp,"P6\n%d %d\n255\n", width, height);
+		LodePNGColorType colortype;
 		switch( compCount ) {
-		case 1:
-			if ( flipped ) {
-				for ( int y=height-1; y>=0; y-- ) {
-					int i = y*width;
-					for ( int x=0; x<width; x++, i++ ) {
-						uchar d[3] = { data[i], data[i], data[i] };
-						fwrite(d,3,1,fp);
-					}
-				}
-			} else {
-				for ( int i=0; i<width*height; i++ ) {
-					uchar d[3] = { data[i], data[i], data[i] };
-					fwrite(d,3,1,fp);
-				}
-			}
-			break;
-		case 3:
-			if ( flipped ) {
-				for ( int y=height-1; y>=0; y-- ) {
-					fwrite(&data[y*width*3],3,width,fp);
-				}
-			} else {
-				fwrite(data,3,width*height,fp);
-			}
-			break;
+			case 1: colortype = LCT_GREY; break;
+			case 3: colortype = LCT_RGB;  break;
+			default: return false;
 		}
-		fclose(fp);
-		return true;
+		unsigned int error = lodepng::encode(filename,data,width,height,colortype,8);
+		return error == 0;
 	}
 };
 
