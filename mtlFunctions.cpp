@@ -50,22 +50,10 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
     }
     
     if (bounceCount > 0) {
-        //If a reflection property exists
-        if (reflection != Color(0,0,0)) {
-            //Calculate the reflected ray direction
-            Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(hInfo.N)*hInfo.N).GetNormalized();
-            
-            Ray reflected = Ray(hInfo.p, reflectedDirection);
-            HitInfo reflectedHInfo;
-            
-            if (Trace(reflected, &rootNode, reflectedHInfo)) {
-                result += reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
-            }
-        }
-        
         //If a refraction property exists
         if (refraction != Color(0,0,0)) {
             //Calcluate the refracted ray direction
+            
             float c1 = hInfo.N.Dot(ray.dir);
             float c2 = sqrt((1.0-ior*ior*(1-c1*c1)));
             
@@ -76,6 +64,19 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             
             if (Trace(refracted, &rootNode, refractedHInfo)) {
                 result += refractedHInfo.node->GetMaterial()->Shade(refracted, refractedHInfo, lights, bounceCount-1);
+            }
+        }
+        
+        //If a reflection property exists
+        if (reflection != Color(0,0,0)) {
+            //Calculate the reflected ray direction
+            Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(hInfo.N)*hInfo.N).GetNormalized();
+            
+            Ray reflected = Ray(hInfo.p, reflectedDirection);
+            HitInfo reflectedHInfo;
+            
+            if (Trace(reflected, &rootNode, reflectedHInfo)) {
+                result += reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
             }
         }
         
