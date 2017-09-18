@@ -46,7 +46,7 @@ void Render(PixelIterator& i)
         
         //If hit, color white
         if (hitResult) {
-            Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights, 5);
+            Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights, 8);
             
             pixelValues.ClampMinMax();
             
