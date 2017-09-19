@@ -155,7 +155,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                                             exp((-refractedHInfo.z)*absorption.b));
                     }
                     
-                    result += absorptionV * refractionResult * (1.0-ShlicksApprox) + frenselResult * ShlicksApprox;
+                    result += absorptionV * refraction * refractionResult * (1.0-ShlicksApprox) + frenselResult * ShlicksApprox;
                 }
             }
         }

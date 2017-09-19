@@ -217,6 +217,7 @@ public:
 	// The main method that handles the shading by calling all the lights in the list.
 	// ray: incoming ray,
 	// hInfo: hit information for the point that is being shaded, lights: the light list,
+	// bounceCount: permitted number of additional bounces for reflection and refraction.
 	virtual Color Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const=0;
 
 	virtual void SetViewportMaterial(int subMtlID=0) const {}	// used for OpenGL display
