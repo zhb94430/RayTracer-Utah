@@ -87,12 +87,14 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                 n2 = ior;
             }
             
-            float iorCorrected = n1/n2;
-            
-            float sinTheta2 = iorCorrected * sinTheta1;
+            float sinTheta2 = (n1/n2) * sinTheta1;
             float cosTheta2 = sqrt(1 - sinTheta2 * sinTheta2);
-            Point3 SVector = hInfo.N.Cross(hInfo.N.Cross(-ray.dir).GetNormalized()).GetNormalized();
             
+            if (cosTheta2 > 1) {
+                cosTheta2 = 1.0;
+            }
+            
+            Point3 SVector = hInfo.N.Cross(hInfo.N.Cross(-ray.dir).GetNormalized()).GetNormalized();
             
             if (sinTheta2 > 1) {
                 //Total Internal Reflection
@@ -121,7 +123,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                 if (Trace(refracted, &rootNode, refractedHInfo)) {
                     //Fresnel Reflection
                     float R0 = pow((n1-n2)/(n1+n2), 2);
-                    float ShlicksApprox = R0 + (1-R0)*pow((1-cosTheta1), 5);
+                    float ShlicksApprox = R0 + (1.0-R0)*pow((1.0-cosTheta1), 5);
                     
                     if (ShlicksApprox > 1) {
                         ShlicksApprox = 1;
