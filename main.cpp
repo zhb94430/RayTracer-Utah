@@ -10,16 +10,17 @@
 #include <thread>
 
 //TODO --------------
-// - Implement all OpenGL interface
-// - Double Check Shading Function
+
 
 //Define & Init Data Stuctures
 RenderImage renderImage;
 Camera camera;
 Sphere theSphere;
+Plane thePlane;
 Node rootNode;
 MaterialList materials;
 LightList lights;
+ObjFileList objList;
 
 void BeginRender() {
     //Multi Thread Rendering
@@ -63,7 +64,7 @@ int main(int argc, const char* argv[])
     }
     //Load default scene if no sceneFile provided
     else {
-        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project4.xml");
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project5/scene.xml");
     }
     
     ShowViewport();

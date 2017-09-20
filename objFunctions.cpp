@@ -10,7 +10,7 @@
 #include "ExternalLibrary/objects.h"
 #include "ExternalLibrary/scene.h"
 
-//Sphere intersection
+//Sphere Intersection
 bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 {
     float a,b,c,m,n,sqrtCheck;
@@ -82,5 +82,17 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
         return true;
     }
     
+    return false;
+}
+
+//Plane Intersection
+bool Plane::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
+{
+    return false;
+}
+
+//Triangle Intersection
+bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
+{
     return false;
 }
