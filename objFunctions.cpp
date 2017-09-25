@@ -286,17 +286,17 @@ bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsi
             if (BC1 > 0 && BC2 > 0 && BC3 > 0) {
                 Point3 bc = BC3 * A + BC1 * B + BC2 * C;
                 
-                if (ray.dir.GetNormalized().Dot(N) < 0) {
+                if (ray.dir.Dot(N) < 0) {
                     hInfo.front = true;
                     hInfo.N = GetNormal(faceID, bc).GetNormalized();
                 }
                 else {
                     hInfo.front = false;
-                    hInfo.N = -GetNormal(faceID, bc).GetNormalized();
+                    hInfo.N = (-GetNormal(faceID, bc)).GetNormalized();
                 }
                 
                 hInfo.z = t;
-                hInfo.p = q + hInfo.N * 0.001;
+                hInfo.p = q + hInfo.N;
                 
                 return true;
             }
