@@ -311,12 +311,12 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 {
     bool hitResult = false;
     
-    if (GetBoundBox().IntersectRay(ray, BIGFLOAT)){
+//    if (GetBoundBox().IntersectRay(ray, BIGFLOAT)){
         //Iterate through all faces
         for (int i = 0; i < NF(); i++) {
             hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
         }
-    }
+//    }
 
     return hitResult;
 }
