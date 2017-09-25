@@ -251,23 +251,23 @@ bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsi
             Point3 q = ray.p + ray.dir*t;
             
             //Project triangle into 2D
-            float maxNormalAxis = std::max(std::max(abs(N.x), abs(N.y)), abs(N.z));
+            float maxNormalAxis = std::max(std::max(fabsf(N.x), fabsf(N.y)), fabsf(N.z));
             
             Point2 ProjectedA, ProjectedB, ProjectedC, ProjectedQ;
             
-            if (maxNormalAxis == abs(N.x)) {
+            if (maxNormalAxis == fabsf(N.x)) {
                 ProjectedA = Point2(A.y, A.z);
                 ProjectedB = Point2(B.y, B.z);
                 ProjectedC = Point2(C.y, C.z);
                 ProjectedQ = Point2(q.y, q.z);
             }
-            else if (maxNormalAxis == abs(N.y)) {
+            else if (maxNormalAxis == fabsf(N.y)) {
                 ProjectedA = Point2(A.x, A.z);
                 ProjectedB = Point2(B.x, B.z);
                 ProjectedC = Point2(C.x, C.z);
                 ProjectedQ = Point2(q.x, q.z);
             }
-            else if (maxNormalAxis == abs(N.z)) {
+            else if (maxNormalAxis == fabsf(N.z)) {
                 ProjectedA = Point2(A.x, A.y);
                 ProjectedB = Point2(B.x, B.y);
                 ProjectedC = Point2(C.x, C.y);
@@ -283,20 +283,21 @@ bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsi
             float BC2 = TriABPArea/TriABCArea;
             float BC3 = 1.0 - BC1 - BC2;
             
-            if (BC1 > 0 && BC2 > 0 && BC3 > 0) {
-                Point3 bc = BC3 * A + BC1 * B + BC2 * C;
+            if (BC1 > 0 && BC2 > 0 && BC3 > 0 &&
+                BC1 < 1 && BC2 < 1 && BC3 < 1) {
+                Point3 bc = Point3(BC3, BC1, BC2);
                 
                 if (ray.dir.Dot(N) < 0) {
-                    hInfo.front = true;
+                    //hInfo.front = true;
                     hInfo.N = GetNormal(faceID, bc).GetNormalized();
                 }
                 else {
-                    hInfo.front = false;
-                    hInfo.N = (-GetNormal(faceID, bc)).GetNormalized();
+                    //hInfo.front = false;
+                    hInfo.N = GetNormal(faceID, bc).GetNormalized();
                 }
                 
                 hInfo.z = t;
-                hInfo.p = q + hInfo.N;
+                hInfo.p = GetPoint(faceID, bc) ;
                 
                 return true;
             }

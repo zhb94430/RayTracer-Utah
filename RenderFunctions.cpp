@@ -46,6 +46,12 @@ void Render(PixelIterator& i)
         
         //If hit, shade the pixel
         if (hitResult) {
+            const char* sresult = h.node->GetName();
+            const char* compare = "/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project5/teapot-low.obj";
+            if (strcmp(sresult, compare )==0) {
+                int x = 1;
+            }
+            
             Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights, 8);
             
 //            Color pixelValues = Color(h.N.x, h.N.y, h.N.z);
@@ -81,6 +87,12 @@ bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
     if (currentNode->GetNodeObj() != nullptr) {
         currentNodeIsHit = currentNode->GetNodeObj()->IntersectRay(currentNode->ToNodeCoords(r), hInfo);
         if (currentNodeIsHit) {
+            const char* sresult = currentNode->GetName();
+            const char* compare = "/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project5/teapot-low.obj";
+            if (strcmp(sresult, compare )==0) {
+                int x = 1;
+            }
+            
             hInfo.node = currentNode;
             //Convert everything back to world coord
             currentNode->FromNodeCoords(hInfo);
