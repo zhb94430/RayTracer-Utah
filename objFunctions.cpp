@@ -88,11 +88,234 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 //Plane Intersection
 bool Plane::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 {
+    if (ray.dir.z != 0) {
+        float t = (-ray.p.z)/(ray.dir.z);
+        
+        if (t > 0.001 && t < hInfo.z) {
+            Point3 q = ray.p + ray.dir*t;
+            
+            if (q.x > -1.001 && q.x < 1.001 &&
+                q.y > -1.001 && q.y < 1.001 &&
+                q.z > -0.001 && q.z < 1.001) {
+                
+                if (ray.p.z > 0) {
+                    hInfo.front = true;
+                    hInfo.N = Point3(0,0,1);
+                }
+                else {
+                    hInfo.front = false;
+                    hInfo.N = Point3(0,0,-1);
+                }
+                
+                q = Point3(q.x, q.y, 0);
+                hInfo.z = t;
+                hInfo.p = q + hInfo.N * 0.001;
+                
+                return true;
+            }
+        }
+    }
+    
     return false;
 }
 
+//Bounding Box Intersection
+bool Box::IntersectRay(const Ray &r, float t_max) const {
+    Point3 allMin = Corner(0);
+    Point3 allMax = Corner(7);
+    float tEntry;
+    float tExit;
+    
+    //Special Cases
+    if (IsEmpty()) {
+        return false;
+    }
+    
+    if (r.dir.x == 0) {
+        //Parallel to X Plane
+        float ty0 = (allMin.y - r.p.y)/r.dir.y;
+        float ty1 = (allMax.y - r.p.y)/r.dir.y;
+        float tz0 = (allMin.z - r.p.z)/r.dir.z;
+        float tz1 = (allMax.z - r.p.z)/r.dir.z;
+        
+        if (ty0 > ty1) {
+            float temp = ty1;
+            ty1 = ty0;
+            ty0 = temp;
+        }
+        if (tz0 > tz1) {
+            float temp = tz1;
+            tz1 = tz0;
+            tz0 = temp;
+        }
+        
+        tEntry = std::max(tz0, ty0);
+        tExit = std::min(tz1, ty1);
+    }
+    else if (r.dir.y == 0) {
+        //Parallel to Y Plane
+        float tx0 = (allMin.x - r.p.x)/r.dir.x;
+        float tx1 = (allMax.x - r.p.x)/r.dir.x;
+        float tz0 = (allMin.z - r.p.z)/r.dir.z;
+        float tz1 = (allMax.z - r.p.z)/r.dir.z;
+        
+        if (tx0 > tx1) {
+            float temp = tx1;
+            tx1 = tx0;
+            tx0 = temp;
+        }
+        if (tz0 > tz1) {
+            float temp = tz1;
+            tz1 = tz0;
+            tz0 = temp;
+        }
+        
+        tEntry = std::max(tz0, tx0);
+        tExit = std::min(tz1, tx1);
+    }
+    else if (r.dir.z == 0) {
+        //Parallel to Z Plane
+        float tx0 = (allMin.x - r.p.x)/r.dir.x;
+        float tx1 = (allMax.x - r.p.x)/r.dir.x;
+        float ty0 = (allMin.y - r.p.y)/r.dir.y;
+        float ty1 = (allMax.y - r.p.y)/r.dir.y;
+        
+        if (tx0 > tx1) {
+            float temp = tx1;
+            tx1 = tx0;
+            tx0 = temp;
+        }
+        if (ty0 > ty1) {
+            float temp = ty1;
+            ty1 = ty0;
+            ty0 = temp;
+        }
+        
+        tEntry = std::max(ty0, tx0);
+        tExit = std::min(ty1, tx1);
+    }
+    else {
+        //General Case
+        float tx0 = (allMin.x - r.p.x)/r.dir.x;
+        float tx1 = (allMax.x - r.p.x)/r.dir.x;
+        float ty0 = (allMin.y - r.p.y)/r.dir.y;
+        float ty1 = (allMax.y - r.p.y)/r.dir.y;
+        float tz0 = (allMin.z - r.p.z)/r.dir.z;
+        float tz1 = (allMax.z - r.p.z)/r.dir.z;
+        
+        //Make sure Pt0 is smaller than Pt1
+        if (tx0 > tx1) {
+            float temp = tx1;
+            tx1 = tx0;
+            tx0 = temp;
+        }
+        if (ty0 > ty1) {
+            float temp = ty1;
+            ty1 = ty0;
+            ty0 = temp;
+        }
+        if (tz0 > tz1) {
+            float temp = tz1;
+            tz1 = tz0;
+            tz0 = temp;
+        }
+        
+        //Compute Entry and Exit Point
+        tEntry = std::max(std::max(tx0, ty0), tz0);
+        tExit = std::min(std::min(tx1, ty1), tz1);
+    }
+
+    if (tEntry <= tExit && tEntry < t_max) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 //Triangle Intersection
+bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsigned int faceID) const {
+    //Get the triangle
+    Point3 A = V(F(faceID).v[0]);
+    Point3 B = V(F(faceID).v[1]);
+    Point3 C = V(F(faceID).v[2]);
+    
+    Point3 N = (B-A).Cross(C-A).GetNormalized();
+    
+    if (ray.dir.Dot(N) != 0) {
+        
+        float t = (A-ray.p).Dot(N) / ray.dir.Dot(N);
+        
+        //Calculate BaryCentric Coordinates
+        if (t > 0.001 && t < hInfo.z) {
+            Point3 q = ray.p + ray.dir*t;
+            
+            //Project triangle into 2D
+            float maxNormalAxis = std::max(std::max(abs(N.x), abs(N.y)), abs(N.z));
+            
+            Point2 ProjectedA, ProjectedB, ProjectedC, ProjectedQ;
+            
+            if (maxNormalAxis == abs(N.x)) {
+                ProjectedA = Point2(A.y, A.z);
+                ProjectedB = Point2(B.y, B.z);
+                ProjectedC = Point2(C.y, C.z);
+                ProjectedQ = Point2(q.y, q.z);
+            }
+            else if (maxNormalAxis == abs(N.y)) {
+                ProjectedA = Point2(A.x, A.z);
+                ProjectedB = Point2(B.x, B.z);
+                ProjectedC = Point2(C.x, C.z);
+                ProjectedQ = Point2(q.x, q.z);
+            }
+            else if (maxNormalAxis == abs(N.z)) {
+                ProjectedA = Point2(A.x, A.y);
+                ProjectedB = Point2(B.x, B.y);
+                ProjectedC = Point2(C.x, C.y);
+                ProjectedQ = Point2(q.x, q.y);
+            }
+            
+            //Calculate BC based on area
+            float TriABCArea = (ProjectedC-ProjectedA).Cross(ProjectedB-ProjectedA)/2.0;
+            float TriAPCArea = (ProjectedC-ProjectedA).Cross(ProjectedQ-ProjectedA)/2.0;
+            float TriABPArea = (ProjectedQ-ProjectedA).Cross(ProjectedB-ProjectedA)/2.0;
+            
+            float BC1 = TriAPCArea/TriABCArea;
+            float BC2 = TriABPArea/TriABCArea;
+            float BC3 = 1.0 - BC1 - BC2;
+            
+            if (BC1 > 0 && BC2 > 0 && BC3 > 0) {
+                Point3 bc = BC3 * A + BC1 * B + BC2 * C;
+                
+                if (ray.dir.GetNormalized().Dot(N) < 0) {
+                    hInfo.front = true;
+                    hInfo.N = GetNormal(faceID, bc).GetNormalized();
+                }
+                else {
+                    hInfo.front = false;
+                    hInfo.N = -GetNormal(faceID, bc).GetNormalized();
+                }
+                
+                hInfo.z = t;
+                hInfo.p = q + hInfo.N * 0.001;
+                
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
 bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 {
-    return false;
+    bool hitResult = false;
+    
+    if (GetBoundBox().IntersectRay(ray, BIGFLOAT)){
+        //Iterate through all faces
+        for (int i = 0; i < NF(); i++) {
+            hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
+        }
+    }
+
+    return hitResult;
 }

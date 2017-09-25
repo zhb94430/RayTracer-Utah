@@ -44,9 +44,11 @@ void Render(PixelIterator& i)
         int imgArrayIndex = x+renderImage.GetWidth()*y;
         renderImage.GetZBuffer()[imgArrayIndex] = h.z;
         
-        //If hit, color white
+        //If hit, shade the pixel
         if (hitResult) {
             Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights, 8);
+            
+//            Color pixelValues = Color(h.N.x, h.N.y, h.N.z);
             
             pixelValues.ClampMinMax();
             
