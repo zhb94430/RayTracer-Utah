@@ -125,14 +125,6 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                     float R0 = pow((n1-n2)/(n1+n2), 2);
                     float ShlicksApprox = R0 + (1.0-R0)*pow((1.0-cosTheta1), 5);
                     
-                    if (ShlicksApprox > 1) {
-                        ShlicksApprox = 1;
-                    }
-                    
-                    if (ShlicksApprox < 0) {
-                        ShlicksApprox = 0;
-                    }
-                    
                     Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(hInfo.N)*hInfo.N).GetNormalized();
                     
                     Ray reflected = Ray(hInfo.p, reflectedDirection);
