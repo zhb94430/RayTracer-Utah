@@ -14,18 +14,19 @@
 //Sphere Intersection
 bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 {
-    float a,b,c,m,n,sqrtCheck;
-    
-    a = ray.dir.Dot(ray.dir);
-    b = 2*((ray.p - Point3(0,0,0)).Dot(ray.dir));
-    c = ray.p.Dot(ray.p) - 1;
-    
-    sqrtCheck = b*b-4*a*c;
-    
-    m = (-b+sqrt(sqrtCheck))/(2*a);
-    n = (-b-sqrt(sqrtCheck))/(2*a);
-    
-    if (m == n && m < hInfo.z && m >= 0.001) {
+    if (GetBoundBox().IntersectRay(ray, BIGFLOAT)) {
+        float a,b,c,m,n,sqrtCheck;
+        
+        a = ray.dir.Dot(ray.dir);
+        b = 2*((ray.p - Point3(0,0,0)).Dot(ray.dir));
+        c = ray.p.Dot(ray.p) - 1;
+        
+        sqrtCheck = b*b-4*a*c;
+        
+        m = (-b+sqrt(sqrtCheck))/(2*a);
+        n = (-b-sqrt(sqrtCheck))/(2*a);
+        
+        if (m == n && m < hInfo.z && m >= 0.001) {
             hInfo.z = m;
             hInfo.front = true;
             
@@ -35,52 +36,53 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
             hInfo.p = temp;
             
             return true;
-    }
-    else if (m < n  && m < hInfo.z && (m >= 0.001 | n >= 0.001)) {
-        if (m <= 0.001 && n > 0.001 && n < hInfo.z) {
-            hInfo.z = n;
-            hInfo.front = false;
         }
-        else if (m > 0.001) {
-            hInfo.z = m;
-            hInfo.front = true;
+        else if (m < n  && m < hInfo.z && (m >= 0.001 | n >= 0.001)) {
+            if (m <= 0.001 && n > 0.001 && n < hInfo.z) {
+                hInfo.z = n;
+                hInfo.front = false;
+            }
+            else if (m > 0.001) {
+                hInfo.z = m;
+                hInfo.front = true;
+            }
+            
+            Point3 temp = ray.p + hInfo.z * ray.dir;
+            
+            if (hInfo.front) {
+                hInfo.N = temp.GetNormalized();
+            }
+            else {
+                hInfo.N = -temp.GetNormalized();
+            }
+            
+            hInfo.p = temp;
+            
+            return true;
         }
-        
-        Point3 temp = ray.p + hInfo.z * ray.dir;
-        
-        if (hInfo.front) {
-            hInfo.N = temp.GetNormalized();
+        else if (n < m && n < hInfo.z && (m >= 0.001 | n >= 0.001)) {
+            if (n <= 0.001 && m > 0.001 && m < hInfo.z) {
+                hInfo.z = m;
+                hInfo.front = false;
+            }
+            else if (n > 0.001) {
+                hInfo.z = n;
+                hInfo.front = true;
+            }
+            
+            Point3 temp = ray.p + hInfo.z * ray.dir;
+            
+            if (hInfo.front) {
+                hInfo.N = temp.GetNormalized();
+            }
+            else {
+                hInfo.N = -temp.GetNormalized();
+            }
+            
+            hInfo.p = temp;
+            
+            return true;
         }
-        else {
-            hInfo.N = -temp.GetNormalized();
-        }
-        
-        hInfo.p = temp;
-        
-        return true;
-    }
-    else if (n < m && n < hInfo.z && (m >= 0.001 | n >= 0.001)) {
-        if (n <= 0.001 && m > 0.001 && m < hInfo.z) {
-            hInfo.z = m;
-            hInfo.front = false;
-        }
-        else if (n > 0.001) {
-            hInfo.z = n;
-            hInfo.front = true;
-        }
-        
-        Point3 temp = ray.p + hInfo.z * ray.dir;
-        
-        if (hInfo.front) {
-            hInfo.N = temp.GetNormalized();
-        }
-        else {
-            hInfo.N = -temp.GetNormalized();
-        }
-        
-        hInfo.p = temp;
-        
-        return true;
     }
     
     return false;
@@ -89,30 +91,32 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 //Plane Intersection
 bool Plane::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 {
-    if (ray.dir.z != 0) {
-        float t = (-ray.p.z)/(ray.dir.z);
-        
-        if (t > 0.001 && t < hInfo.z) {
-            Point3 q = ray.p + ray.dir*t;
+    if (GetBoundBox().IntersectRay(ray, BIGFLOAT)) {
+        if (ray.dir.z != 0) {
+            float t = (-ray.p.z)/(ray.dir.z);
             
-            if (q.x > -1.001 && q.x < 1.001 &&
-                q.y > -1.001 && q.y < 1.001 &&
-                q.z > -0.001 && q.z < 1.001) {
+            if (t > 0.001 && t < hInfo.z) {
+                Point3 q = ray.p + ray.dir*t;
                 
-                if (ray.p.z > 0) {
-                    hInfo.front = true;
-                    hInfo.N = Point3(0,0,1);
+                if (q.x > -1.001 && q.x < 1.001 &&
+                    q.y > -1.001 && q.y < 1.001 &&
+                    q.z > -0.001 && q.z < 1.001) {
+                    
+                    if (ray.p.z > 0) {
+                        hInfo.front = true;
+                        hInfo.N = Point3(0,0,1);
+                    }
+                    else {
+                        hInfo.front = false;
+                        hInfo.N = Point3(0,0,-1);
+                    }
+                    
+                    q = Point3(q.x, q.y, 0);
+                    hInfo.z = t;
+                    hInfo.p = q + hInfo.N * 0.001;
+                    
+                    return true;
                 }
-                else {
-                    hInfo.front = false;
-                    hInfo.N = Point3(0,0,-1);
-                }
-                
-                q = Point3(q.x, q.y, 0);
-                hInfo.z = t;
-                hInfo.p = q + hInfo.N * 0.001;
-                
-                return true;
             }
         }
     }
@@ -317,12 +321,16 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
     
     if (GetBoundBox().IntersectRay(ray, BIGFLOAT)){
         //Traverse Bounding Volume Hierarchy
-        std::vector<unsigned int> BVHStack = {bvh.GetRootNodeID()};
-
+        static const int STACK_MAX = 100;
+        int stackTop = 0;
+        unsigned int BVHTraceStack[STACK_MAX];
+        
+        BVHTraceStack[stackTop] = bvh.GetRootNodeID();
+        
         //Start iteration
-        while (!BVHStack.empty()) {
-            unsigned int currentNodeIndex = BVHStack.back();
-            BVHStack.pop_back();
+        while (stackTop >= 0) {
+            unsigned int currentNodeIndex = BVHTraceStack[stackTop];
+            stackTop--;
 
             //If not a leaf node
             //Check which child node is closer
@@ -335,14 +343,45 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
                 float child1TValue = BVHBoxIntersection(ray, child1Box, BIGFLOAT);
                 float child2TValue = BVHBoxIntersection(ray, child2Box, BIGFLOAT);
 
-                if (child1TValue < child2TValue) {
-                    BVHStack.push_back(secondChildIndex);
-                    BVHStack.push_back(firstChildIndex);
+                if (child1TValue > -0.01) {
+                    if (child2TValue > -0.01) {
+                        if (child1TValue <= child2TValue) {
+                            stackTop++;
+                            BVHTraceStack[stackTop] = secondChildIndex;
+                            stackTop++;
+                            BVHTraceStack[stackTop] = firstChildIndex;
+                        }
+                        else {
+                            stackTop++;
+                            BVHTraceStack[stackTop] = firstChildIndex;
+                            stackTop++;
+                            BVHTraceStack[stackTop] = secondChildIndex;
+                        }
+                    }
+                    else {
+                        stackTop++;
+                        BVHTraceStack[stackTop] = firstChildIndex;
+                    }
                 }
                 else {
-                    BVHStack.push_back(firstChildIndex);
-                    BVHStack.push_back(secondChildIndex);
+                    if (child2TValue > -.01) {
+                        stackTop++;
+                        BVHTraceStack[stackTop] = secondChildIndex;
+                    }
                 }
+                
+//                if (child1TValue <= child2TValue) {
+//                    stackTop++;
+//                    BVHTraceStack[stackTop] = secondChildIndex;
+//                    stackTop++;
+//                    BVHTraceStack[stackTop] = firstChildIndex;
+//                }
+//                else {
+//                    stackTop++;
+//                    BVHTraceStack[stackTop] = firstChildIndex;
+//                    stackTop++;
+//                    BVHTraceStack[stackTop] = secondChildIndex;
+//                }
             }
             //Intersect with leaf node
             else {
