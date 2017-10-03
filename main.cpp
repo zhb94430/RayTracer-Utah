@@ -22,7 +22,7 @@ MaterialList materials;
 LightList lights;
 ObjFileList objList;
 
-void BeginRender() {
+void SpawnRenderThreads() {
     //Multi Thread Rendering
     PixelIterator i = PixelIterator();
     int CPUCoreNumber = std::thread::hardware_concurrency();
@@ -31,10 +31,10 @@ void BeginRender() {
         CPUCoreNumber = 1;
     }
     
-//#ifdef DEBUG
+    //#ifdef DEBUG
     //DEBUG PURPOSE
-//    CPUCoreNumber = 1;
-//#endif
+//        CPUCoreNumber = 1;
+    //#endif
     
     for (int j = 0; j < CPUCoreNumber; j++) {
         std::thread(Render, std::ref(i)).detach();
@@ -43,11 +43,14 @@ void BeginRender() {
     while (!i.IterationComplete()) {
         
     }
-    
     //Output Image
     renderImage.SaveImage("Result.png");
     renderImage.ComputeZBufferImage();
     renderImage.SaveZImage("ZBuffer.png");
+}
+
+void BeginRender() {
+    std::thread(SpawnRenderThreads).detach();
 }
 
 void StopRender() {

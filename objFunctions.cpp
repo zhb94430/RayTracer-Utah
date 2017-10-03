@@ -9,6 +9,7 @@
 
 #include "ExternalLibrary/objects.h"
 #include "ExternalLibrary/scene.h"
+#include <vector>
 
 //Sphere Intersection
 bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
@@ -307,16 +308,170 @@ bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsi
     return false;
 }
 
+//BVHBox Intersection for BVH traversal
+float BVHBoxIntersection(const Ray &r, Box bvhBox, float t_max);
+
 bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 {
     bool hitResult = false;
     
-//    if (GetBoundBox().IntersectRay(ray, BIGFLOAT)){
-        //Iterate through all faces
-        for (int i = 0; i < NF(); i++) {
-            hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
-        }
-//    }
+    if (GetBoundBox().IntersectRay(ray, BIGFLOAT)){
+        //Traverse Bounding Volume Hierarchy
+        std::vector<unsigned int> BVHStack = {bvh.GetRootNodeID()};
 
+        //Start iteration
+        while (!BVHStack.empty()) {
+            unsigned int currentNodeIndex = BVHStack.back();
+            BVHStack.pop_back();
+
+            //If not a leaf node
+            //Check which child node is closer
+            if (!bvh.IsLeafNode(currentNodeIndex)) {
+                unsigned int firstChildIndex = bvh.GetFirstChildNode(currentNodeIndex);
+                unsigned int secondChildIndex = bvh.GetSecondChildNode(currentNodeIndex);
+                Box child1Box = Box(bvh.GetNodeBounds(firstChildIndex));
+                Box child2Box = Box(bvh.GetNodeBounds(secondChildIndex));
+
+                float child1TValue = BVHBoxIntersection(ray, child1Box, BIGFLOAT);
+                float child2TValue = BVHBoxIntersection(ray, child2Box, BIGFLOAT);
+
+                if (child1TValue < child2TValue) {
+                    BVHStack.push_back(secondChildIndex);
+                    BVHStack.push_back(firstChildIndex);
+                }
+                else {
+                    BVHStack.push_back(firstChildIndex);
+                    BVHStack.push_back(secondChildIndex);
+                }
+            }
+            //Intersect with leaf node
+            else {
+                if (Box(bvh.GetNodeBounds(currentNodeIndex)).IntersectRay(ray, BIGFLOAT)) {
+                    //Iterate through all faces
+                    for (int i = 0; i < bvh.GetNodeElementCount(currentNodeIndex); i++) {
+                        hitResult |= IntersectTriangle(ray, hInfo, hitSide, bvh.GetNodeElements(currentNodeIndex)[i]);
+                    }
+                }
+            }
+        }
+        
+        //Iterate through all faces
+//        for (int i = 0; i < NF(); i++) {
+//            hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
+//        }
+    }
     return hitResult;
+}
+
+float BVHBoxIntersection(const Ray &r, Box bvhBox, float t_max) {
+    Point3 allMin = bvhBox.Corner(0);
+    Point3 allMax = bvhBox.Corner(7);
+    float tEntry;
+    float tExit;
+    
+    //Special Cases
+    if (bvhBox.IsEmpty()) {
+        return -1.0;
+    }
+    
+    if (r.dir.x == 0) {
+        //Parallel to X Plane
+        float ty0 = (allMin.y - r.p.y)/r.dir.y;
+        float ty1 = (allMax.y - r.p.y)/r.dir.y;
+        float tz0 = (allMin.z - r.p.z)/r.dir.z;
+        float tz1 = (allMax.z - r.p.z)/r.dir.z;
+        
+        if (ty0 > ty1) {
+            float temp = ty1;
+            ty1 = ty0;
+            ty0 = temp;
+        }
+        if (tz0 > tz1) {
+            float temp = tz1;
+            tz1 = tz0;
+            tz0 = temp;
+        }
+        
+        tEntry = std::max(tz0, ty0);
+        tExit = std::min(tz1, ty1);
+    }
+    else if (r.dir.y == 0) {
+        //Parallel to Y Plane
+        float tx0 = (allMin.x - r.p.x)/r.dir.x;
+        float tx1 = (allMax.x - r.p.x)/r.dir.x;
+        float tz0 = (allMin.z - r.p.z)/r.dir.z;
+        float tz1 = (allMax.z - r.p.z)/r.dir.z;
+        
+        if (tx0 > tx1) {
+            float temp = tx1;
+            tx1 = tx0;
+            tx0 = temp;
+        }
+        if (tz0 > tz1) {
+            float temp = tz1;
+            tz1 = tz0;
+            tz0 = temp;
+        }
+        
+        tEntry = std::max(tz0, tx0);
+        tExit = std::min(tz1, tx1);
+    }
+    else if (r.dir.z == 0) {
+        //Parallel to Z Plane
+        float tx0 = (allMin.x - r.p.x)/r.dir.x;
+        float tx1 = (allMax.x - r.p.x)/r.dir.x;
+        float ty0 = (allMin.y - r.p.y)/r.dir.y;
+        float ty1 = (allMax.y - r.p.y)/r.dir.y;
+        
+        if (tx0 > tx1) {
+            float temp = tx1;
+            tx1 = tx0;
+            tx0 = temp;
+        }
+        if (ty0 > ty1) {
+            float temp = ty1;
+            ty1 = ty0;
+            ty0 = temp;
+        }
+        
+        tEntry = std::max(ty0, tx0);
+        tExit = std::min(ty1, tx1);
+    }
+    else {
+        //General Case
+        float tx0 = (allMin.x - r.p.x)/r.dir.x;
+        float tx1 = (allMax.x - r.p.x)/r.dir.x;
+        float ty0 = (allMin.y - r.p.y)/r.dir.y;
+        float ty1 = (allMax.y - r.p.y)/r.dir.y;
+        float tz0 = (allMin.z - r.p.z)/r.dir.z;
+        float tz1 = (allMax.z - r.p.z)/r.dir.z;
+        
+        //Make sure Pt0 is smaller than Pt1
+        if (tx0 > tx1) {
+            float temp = tx1;
+            tx1 = tx0;
+            tx0 = temp;
+        }
+        if (ty0 > ty1) {
+            float temp = ty1;
+            ty1 = ty0;
+            ty0 = temp;
+        }
+        if (tz0 > tz1) {
+            float temp = tz1;
+            tz1 = tz0;
+            tz0 = temp;
+        }
+        
+        //Compute Entry and Exit Point
+        tEntry = std::max(std::max(tx0, ty0), tz0);
+        tExit = std::min(std::min(tx1, ty1), tz1);
+    }
+    
+    if (tEntry <= tExit && tEntry < t_max) {
+        return tEntry;
+    }
+    else {
+        return -1.0;
+    }
 }

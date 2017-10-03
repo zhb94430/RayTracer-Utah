@@ -130,7 +130,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                     Ray reflected = Ray(hInfo.p, reflectedDirection);
                     HitInfo reflectedHInfo;
                     
-                    Color frenselResult;
+                    Color frenselResult = Color(0.0, 0.0, 0.0);
                     
                     if (Trace(reflected, &rootNode, reflectedHInfo)) {
                         frenselResult = refraction * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
@@ -165,7 +165,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             }
         }
     }
-    
+
     return result;
 }
 
