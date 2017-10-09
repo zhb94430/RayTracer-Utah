@@ -17,6 +17,7 @@
 		D00107301F57CC0F0056FD76 /* mtlFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */; };
 		D00107321F57CC240056FD76 /* objFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D00107311F57CC240056FD76 /* objFunctions.cpp */; };
 		D0A3C1841F5A520700652635 /* lightFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0A3C1831F5A520700652635 /* lightFunctions.cpp */; };
+		D0D0B37A1F8B1BD600FBC166 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0D0B3791F8B1BD500FBC166 /* texture.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -48,6 +49,7 @@
 		D057C4781F5F426B00344B39 /* RenderFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RenderFunctions.h; path = ../RenderFunctions.h; sourceTree = SOURCE_ROOT; };
 		D0A3C1831F5A520700652635 /* lightFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lightFunctions.cpp; path = ../lightFunctions.cpp; sourceTree = SOURCE_ROOT; };
 		D0B9C0641F5A26DE008D6919 /* PixelIterator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PixelIterator.h; path = ../PixelIterator.h; sourceTree = SOURCE_ROOT; };
+		D0D0B3791F8B1BD500FBC166 /* texture.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = texture.cpp; path = ../ExternalLibrary/texture.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +72,7 @@
 		D00106FF1F4E2D360056FD76 = {
 			isa = PBXGroup;
 			children = (
+				D0D0B3791F8B1BD500FBC166 /* texture.cpp */,
 				D001070A1F4E2D360056FD76 /* RayTracerXcode */,
 				D00107091F4E2D360056FD76 /* Products */,
 				D00107151F4E2D550056FD76 /* Frameworks */,
@@ -174,6 +177,7 @@
 				D0A3C1841F5A520700652635 /* lightFunctions.cpp in Sources */,
 				D00107141F4E2D470056FD76 /* main.cpp in Sources */,
 				D00107321F57CC240056FD76 /* objFunctions.cpp in Sources */,
+				D0D0B37A1F8B1BD600FBC166 /* texture.cpp in Sources */,
 				D00107301F57CC0F0056FD76 /* mtlFunctions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -21,6 +21,9 @@ Node rootNode;
 MaterialList materials;
 LightList lights;
 ObjFileList objList;
+TexturedColor background;
+TexturedColor environment;
+TextureList textureList;
 
 void SpawnRenderThreads() {
     //Multi Thread Rendering
@@ -67,7 +70,7 @@ int main(int argc, const char* argv[])
     }
     //Load default scene if no sceneFile provided
     else {
-        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project5/scene.xml");
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project7/scene.xml");
     }
     
     ShowViewport();

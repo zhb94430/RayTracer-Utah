@@ -27,7 +27,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             
             //Ambient Light
             if (currentLight->IsAmbient()) {
-                result += diffuse*currentLight->Illuminate(hInfo.p, hInfo.N);
+                result += diffuse.Sample(hInfo.uvw) *currentLight->Illuminate(hInfo.p, hInfo.N);
             }
             
             //Shading Happens in World Space
@@ -47,7 +47,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                     NDotH = 0.0;
                 }
                 
-                result += currentLight->Illuminate(hInfo.p, hInfo.N)*NDotL*(diffuse+specular*pow(NDotH, glossiness));
+                result += currentLight->Illuminate(hInfo.p, hInfo.N)*NDotL*(diffuse.Sample(hInfo.uvw)+specular.Sample(hInfo.uvw)*pow(NDotH, glossiness));
             }
         }
     }
@@ -57,7 +57,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
     if (bounceCount > 0) {
         
         //If a refraction property exists
-        if (refraction != Color(0,0,0)) {
+        if (refraction.Sample(hInfo.uvw) != Color(0,0,0)) {
             //Calcluate the refracted ray direction
             float cosTheta1 = hInfo.N.Dot(-ray.dir);
             float sinTheta1 = sqrt(1-pow(cosTheta1,2));
@@ -133,7 +133,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                     Color frenselResult = Color(0.0, 0.0, 0.0);
                     
                     if (Trace(reflected, &rootNode, reflectedHInfo)) {
-                        frenselResult = refraction * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
+                        frenselResult = refraction.Sample(hInfo.uvw) * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
                     }
                     
                     //Refraction Result
@@ -147,13 +147,13 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                                             exp((-refractedHInfo.z)*absorption.b));
                     }
                     
-                    result += absorptionV * refraction * refractionResult * (1.0-ShlicksApprox) + frenselResult * ShlicksApprox;
+                    result += absorptionV * refraction.Sample(hInfo.uvw) * refractionResult * (1.0-ShlicksApprox) + frenselResult * ShlicksApprox;
                 }
             }
         }
         
         //If a reflection property exists
-        if (reflection != Color(0,0,0)) {
+        if (reflection.Sample(hInfo.uvw) != Color(0,0,0)) {
             //Calculate the reflected ray direction
             Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(hInfo.N)*hInfo.N).GetNormalized();
             
@@ -161,7 +161,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             HitInfo reflectedHInfo;
             
             if (Trace(reflected, &rootNode, reflectedHInfo)) {
-                result += reflection * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
+                result += reflection.Sample(hInfo.uvw) * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
             }
         }
     }
