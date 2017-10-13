@@ -294,13 +294,13 @@ bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsi
                 
                 if (ray.dir.Dot(N) < 0) {
                     hInfo.front = true;
-                    hInfo.N = GetNormal(faceID, bc).GetNormalized();
                 }
                 else {
                     hInfo.front = false;
-                    hInfo.N = GetNormal(faceID, bc).GetNormalized();
                 }
                 
+                hInfo.uvw = GetTexCoord(faceID, bc);
+                hInfo.N = GetNormal(faceID, bc).GetNormalized();
                 hInfo.z = t;
                 hInfo.p = GetPoint(faceID, bc) ;
                 
