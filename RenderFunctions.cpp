@@ -16,6 +16,7 @@ extern Camera camera;
 extern RenderImage renderImage;
 extern MaterialList materials;
 extern LightList lights;
+extern TexturedColor background;
 
 float actualHeight, actualWidth;
 
@@ -73,11 +74,13 @@ void Render(PixelIterator& i)
             renderImage.GetPixels()[imgArrayIndex].b = pixelValues.b * 255;
             renderImage.IncrementNumRenderPixel(1);
         }
-        //Else, color black
+        //Else, Sample background
         else {
-            renderImage.GetPixels()[imgArrayIndex].r = 0;
-            renderImage.GetPixels()[imgArrayIndex].g = 0;
-            renderImage.GetPixels()[imgArrayIndex].b = 0;
+            Color result = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+
+            renderImage.GetPixels()[imgArrayIndex].r = result.r * 255;
+            renderImage.GetPixels()[imgArrayIndex].g = result.g * 255;
+            renderImage.GetPixels()[imgArrayIndex].b = result.b * 255;
             renderImage.IncrementNumRenderPixel(1);
         }
 

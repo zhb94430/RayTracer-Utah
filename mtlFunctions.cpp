@@ -14,6 +14,7 @@
 
 extern Camera camera;
 extern Node rootNode;
+extern TexturedColor environment;
 
 Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const
 {
@@ -135,6 +136,9 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                     if (Trace(reflected, &rootNode, reflectedHInfo)) {
                         frenselResult = refraction.Sample(hInfo.uvw) * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
                     }
+                    else {
+                        frenselResult = environment.SampleEnvironment(reflectedDirection);
+                    }
                     
                     //Refraction Result
                     Color refractionResult = refractedHInfo.node->GetMaterial()->Shade(refracted, refractedHInfo, lights, bounceCount-1);
@@ -149,6 +153,9 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                     
                     result += absorptionV * refraction.Sample(hInfo.uvw) * refractionResult * (1.0-ShlicksApprox) + frenselResult * ShlicksApprox;
                 }
+                else {
+                    result += environment.SampleEnvironment(refractedDirection);
+                }
             }
         }
         
@@ -162,6 +169,9 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             
             if (Trace(reflected, &rootNode, reflectedHInfo)) {
                 result += reflection.Sample(hInfo.uvw) * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
+            }
+            else {
+                result += environment.SampleEnvironment(reflectedDirection);
             }
         }
     }

@@ -35,6 +35,11 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
             hInfo.N = temp.GetNormalized();
             hInfo.p = temp;
             
+            float u = 0.5-atan2(hInfo.N.x, hInfo.N.y)/(2*M_PI);
+            float v = 0.5+asin(hInfo.N.z)/M_PI;
+            
+            hInfo.uvw = Point3(u,v,0);
+            
             return true;
         }
         else if (m < n  && m < hInfo.z && (m >= 0.001 | n >= 0.001)) {
@@ -57,6 +62,11 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
             }
             
             hInfo.p = temp;
+            
+            float u = 0.5-atan2(hInfo.N.x, hInfo.N.y)/(2*M_PI);
+            float v = 0.5+asin(hInfo.N.z)/M_PI;
+            
+            hInfo.uvw = Point3(u,v,0);
             
             return true;
         }
@@ -81,6 +91,11 @@ bool Sphere::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
             
             hInfo.p = temp;
             
+            float u = 0.5-atan2(hInfo.N.x, hInfo.N.y)/(2*M_PI);
+            float v = 0.5+asin(hInfo.N.z)/M_PI;
+            
+            hInfo.uvw = Point3(u,v,0);
+            
             return true;
         }
     }
@@ -98,9 +113,8 @@ bool Plane::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
             if (t > 0.001 && t < hInfo.z) {
                 Point3 q = ray.p + ray.dir*t;
                 
-                if (q.x > -1.001 && q.x < 1.001 &&
-                    q.y > -1.001 && q.y < 1.001 &&
-                    q.z > -0.001 && q.z < 1.001) {
+                if (q.x > -1 && q.x < 1 &&
+                    q.y > -1 && q.y < 1) {
                     
                     if (ray.p.z > 0) {
                         hInfo.front = true;
@@ -113,7 +127,8 @@ bool Plane::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
                     
                     q = Point3(q.x, q.y, 0);
                     hInfo.z = t;
-                    hInfo.p = q + hInfo.N * 0.001;
+                    hInfo.p = q;
+                    hInfo.uvw = Point3((q.x+1)/2, (q.y+1)/2, 0);
                     
                     return true;
                 }
@@ -252,7 +267,7 @@ bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsi
         float t = (A-ray.p).Dot(N) / ray.dir.Dot(N);
         
         //Calculate BaryCentric Coordinates
-        if (t > 0.001 && t < hInfo.z) {
+        if (t > 0.00001 && t < hInfo.z) {
             Point3 q = ray.p + ray.dir*t;
             
             //Project triangle into 2D
