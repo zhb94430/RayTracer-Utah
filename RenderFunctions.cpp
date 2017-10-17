@@ -53,7 +53,7 @@ void Render(PixelIterator& i)
 //                int x = 1;
 //            }
 //
-            Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights, 5);
+            Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights, 10);
             
 //            if (pixelValues.r == 0 &&
 //                pixelValues.g == 0 &&
