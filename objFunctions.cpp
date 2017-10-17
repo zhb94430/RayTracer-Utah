@@ -343,59 +343,59 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
         BVHTraceStack[stackTop] = bvh.GetRootNodeID();
         
         //Start iteration
-//        while (stackTop >= 0) {
-//            unsigned int currentNodeIndex = BVHTraceStack[stackTop];
-//            stackTop--;
-//
-//            //If not a leaf node
-//            //Check which child node is closer
-//            if (!bvh.IsLeafNode(currentNodeIndex)) {
-//                unsigned int firstChildIndex = bvh.GetFirstChildNode(currentNodeIndex);
-//                unsigned int secondChildIndex = bvh.GetSecondChildNode(currentNodeIndex);
-//                Box child1Box = Box(bvh.GetNodeBounds(firstChildIndex));
-//                Box child2Box = Box(bvh.GetNodeBounds(secondChildIndex));
-//
-//                float child1TValue = BVHBoxIntersection(ray, child1Box, BIGFLOAT);
-//                float child2TValue = BVHBoxIntersection(ray, child2Box, BIGFLOAT);
-//
-//                if (child1TValue > 0) {
-//                    if (child2TValue > 0) {
-//                        if (child1TValue <= child2TValue) {
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = secondChildIndex;
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = firstChildIndex;
-//                        }
-//                        else {
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = firstChildIndex;
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = secondChildIndex;
-//                        }
-//                    }
-//                    else {
-//                        stackTop++;
-//                        BVHTraceStack[stackTop] = firstChildIndex;
-//                    }
-//                }
-//                else if (child2TValue > 0) {
-//                    stackTop++;
-//                    BVHTraceStack[stackTop] = secondChildIndex;
-//                }
-//            }
-//            //Intersect with leaf node
-//            else {
-//                //Iterate through all faces
-//                for (int i = 0; i < bvh.GetNodeElementCount(currentNodeIndex); i++) {
-//                    hitResult |= IntersectTriangle(ray, hInfo, hitSide, bvh.GetNodeElements(currentNodeIndex)[i]);
-//                }
-//            }
-//        }
+        while (stackTop >= 0) {
+            unsigned int currentNodeIndex = BVHTraceStack[stackTop];
+            stackTop--;
+
+            //If not a leaf node
+            //Check which child node is closer
+            if (!bvh.IsLeafNode(currentNodeIndex)) {
+                unsigned int firstChildIndex = bvh.GetFirstChildNode(currentNodeIndex);
+                unsigned int secondChildIndex = bvh.GetSecondChildNode(currentNodeIndex);
+                Box child1Box = Box(bvh.GetNodeBounds(firstChildIndex));
+                Box child2Box = Box(bvh.GetNodeBounds(secondChildIndex));
+
+                float child1TValue = BVHBoxIntersection(ray, child1Box, BIGFLOAT);
+                float child2TValue = BVHBoxIntersection(ray, child2Box, BIGFLOAT);
+
+                if (child1TValue > 0) {
+                    if (child2TValue > 0) {
+                        if (child1TValue <= child2TValue) {
+                            stackTop++;
+                            BVHTraceStack[stackTop] = secondChildIndex;
+                            stackTop++;
+                            BVHTraceStack[stackTop] = firstChildIndex;
+                        }
+                        else {
+                            stackTop++;
+                            BVHTraceStack[stackTop] = firstChildIndex;
+                            stackTop++;
+                            BVHTraceStack[stackTop] = secondChildIndex;
+                        }
+                    }
+                    else {
+                        stackTop++;
+                        BVHTraceStack[stackTop] = firstChildIndex;
+                    }
+                }
+                else if (child2TValue > 0) {
+                    stackTop++;
+                    BVHTraceStack[stackTop] = secondChildIndex;
+                }
+            }
+            //Intersect with leaf node
+            else {
+                //Iterate through all faces
+                for (int i = 0; i < bvh.GetNodeElementCount(currentNodeIndex); i++) {
+                    hitResult |= IntersectTriangle(ray, hInfo, hitSide, bvh.GetNodeElements(currentNodeIndex)[i]);
+                }
+            }
+        }
         
         //Iterate through all faces
-        for (int i = 0; i < NF(); i++) {
-            hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
-        }
+//        for (int i = 0; i < NF(); i++) {
+//            hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
+//        }
     }
     return hitResult;
 }
