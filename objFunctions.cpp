@@ -439,19 +439,19 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
                 }
 
 
-                // if (child1TValue < child2TValue)
-                // {
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = secondChildIndex;
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = firstChildIndex;
-                // }
-                // else {
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = firstChildIndex;
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = secondChildIndex;
-                // }
+//                 if (child1TValue < child2TValue)
+//                 {
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = secondChildIndex;
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = firstChildIndex;
+//                 }
+//                 else {
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = firstChildIndex;
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = secondChildIndex;
+//                 }
 
                 // stackTop++;
                 // BVHTraceStack[stackTop] = secondChildIndex;

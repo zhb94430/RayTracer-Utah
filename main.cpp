@@ -50,6 +50,8 @@ void SpawnRenderThreads() {
     renderImage.SaveImage("Result.png");
     renderImage.ComputeZBufferImage();
     renderImage.SaveZImage("ZBuffer.png");
+    renderImage.ComputeSampleCountImage();
+    renderImage.SaveSampleCountImage("SampleCount.png");
 }
 
 void BeginRender() {

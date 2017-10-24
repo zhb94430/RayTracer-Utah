@@ -9,6 +9,7 @@
 #include "ExternalLibrary/objects.h"
 #include "PixelIterator.h"
 #include "RenderFunctions.h"
+#include <array>
 
 //Variables
 extern Node rootNode;
@@ -20,7 +21,11 @@ extern TexturedColor background;
 
 float actualHeight, actualWidth;
 
-int sampleSize = 4;
+//Render Parameters
+const int minSampleSize = 4;
+const int maxSampleSize = 16;
+const float targetVariance = 0.05;
+const int sampleIncrement = 1;
 
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
@@ -34,37 +39,112 @@ void Render(PixelIterator& i)
     int x, y;
     
     while (i.GetPixelLocation(x, y)) {
+        srand(time(NULL));
+        
         //Sample Array
-//        Point3 currentPoint[sampleSize];
-//        Ray r[sampleSize];
-//        bool hitResult[sampleSize];
+        std::array<Ray, maxSampleSize> rayArray;
+        std::array<HitInfo, maxSampleSize> hitInfoArray;
+        std::array<bool, maxSampleSize> hitResult;
+        float pixelIncrement = 1.0/minSampleSize;
+        bool hitResultSum = false;
+        float zSum = 0.0;
+        int numOfHits = 0;
         
-//        for (int sampleIndex = 0; index < sampleIndex; sampleIndex++) {
-//            <#statements#>
-//        }
-        
-        //Find current point and generate ray
-        Point3 currentPoint = CalculateCurrentPoint(x, y, 0.5, 0.5, imgOrigin);
-        Ray r = Ray(camera.pos, (currentPoint - camera.pos).GetNormalized());
-        
-        //Everything is stored in World Coordinate
-        HitInfo h = HitInfo();
-        
-        //Trace ray with each object
-        bool hitResult = Trace(r, &rootNode, h);
-        
+        //Populate the two hitinfo array
+        for (int index = 0; index < minSampleSize; index++) {
+            //Generate offset for current sample
+            float currentOffset = index * pixelIncrement;
+//            float offsetX = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/pixelIncrement));
+//            float offsetY = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/pixelIncrement));
+            
+            float offsetX = Halton(index, 4);
+            float offsetY = Halton(index, 5);
+            
+            //Find current point and generate ray
+            Point3 currentPoint = CalculateCurrentPoint(x, y, currentOffset+offsetX, currentOffset+offsetY, imgOrigin);
+            rayArray[index] = Ray(camera.pos, (currentPoint - camera.pos).GetNormalized());
+            
+            //Everything is stored in World Coordinate
+            hitInfoArray[index] = HitInfo();
+            
+            //Trace ray with each object
+            bool currentResult = Trace(rayArray[index], &rootNode, hitInfoArray[index]);
+            
+            hitResult[index] = currentResult;
+            hitResultSum |= currentResult;
+            
+            if (currentResult) {
+                zSum += hitInfoArray[index].z;
+                numOfHits++;
+            }
+        }
+
         int imgArrayIndex = x+renderImage.GetWidth()*y;
-        renderImage.GetZBuffer()[imgArrayIndex] = h.z;
+        renderImage.GetZBuffer()[imgArrayIndex] = zSum / (float)numOfHits;
         
         //If hit, shade the pixel
-        if (hitResult) {
+        if (hitResultSum) {
 //            const char* sresult = h.node->GetName();
 //            const char* compare = "/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project5/teapot-low.obj";
 //            if (strcmp(sresult, compare )==0) {
 //                int x = 1;
 //            }
 //
-            Color pixelValues = h.node->GetMaterial()->Shade(r, h, lights, 10);
+            Color pixelValuesSum = Color(0.0, 0.0, 0.0);
+            std::array<Color, maxSampleSize> pixelValueArray;
+
+            int currentStartIndex = 0;
+            int currentSampleCount = minSampleSize;
+            float currentVariance = 100.0;
+            
+            // Adaptive Sampling
+            while (currentSampleCount < maxSampleSize && currentVariance > targetVariance) {
+                // Shading Calculation
+                for (int index = currentStartIndex; index < currentSampleCount; index++) {
+                    Color currentResult = Color(0.0, 0.0, 0.0);
+                    
+                    if (hitResult[index]) {
+                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 10);
+                    }
+                    else {
+                        currentResult = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+                    }
+                    
+                    pixelValuesSum += currentResult;
+                    pixelValueArray[index] = currentResult;
+                }
+                
+                //Variance Calculation
+                float currentMean = pixelValuesSum.Gray() / (float) currentSampleCount;
+                
+                float sum = 0.0;
+                for (int index = 0; index < currentSampleCount; index++) {
+                    sum += pow((pixelValueArray[index].Gray() - currentMean), 2);
+                }
+                
+                currentVariance = sum / currentSampleCount;
+                
+                //Generate more samples
+                if (currentVariance > targetVariance) {
+                    currentStartIndex = currentSampleCount;
+                    currentSampleCount += sampleIncrement;
+                    
+                    for (int index = currentStartIndex; index < currentSampleCount; index++) {
+                        //Generate sample
+                        float offsetX = Halton(index, 4);
+                        float offsetY = Halton(index, 5);
+                        
+                        Point3 currentPoint = CalculateCurrentPoint(x, y, offsetX, offsetY, imgOrigin);
+                        rayArray[index] = Ray(camera.pos, (currentPoint - camera.pos).GetNormalized());
+                        
+                        //Everything is stored in World Coordinate
+                        hitInfoArray[index] = HitInfo();
+                        
+                        //Trace ray with each object
+                        hitResult[index] = Trace(rayArray[index], &rootNode, hitInfoArray[index]);
+                    }
+                }
+            }
             
 //            if (pixelValues.r == 0 &&
 //                pixelValues.g == 0 &&
@@ -78,17 +158,26 @@ void Render(PixelIterator& i)
             
 //            Color pixelValues = Color(h.N.x, h.N.y, h.N.z);
             
-            pixelValues.ClampMinMax();
+//            pixelValues.ClampMinMax();
             
-            renderImage.GetPixels()[imgArrayIndex].r = pixelValues.r * 255;
-            renderImage.GetPixels()[imgArrayIndex].g = pixelValues.g * 255;
-            renderImage.GetPixels()[imgArrayIndex].b = pixelValues.b * 255;
+//            float rValue = pixelValues.r / (float)sampleSize;
+//            float gValue = pixelValues.g / (float)sampleSize;
+//            float bValue = pixelValues.b / (float)sampleSize;
+            
+            pixelValuesSum /= (float)currentSampleCount;
+            
+            renderImage.GetSampleCount()[imgArrayIndex] = currentSampleCount;
+            
+            renderImage.GetPixels()[imgArrayIndex].r = pixelValuesSum.r * 255;
+            renderImage.GetPixels()[imgArrayIndex].g = pixelValuesSum.g * 255;
+            renderImage.GetPixels()[imgArrayIndex].b = pixelValuesSum.b * 255;
             renderImage.IncrementNumRenderPixel(1);
         }
         //Else, Sample background
         else {
             Color result = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
 
+            renderImage.GetSampleCount()[imgArrayIndex] = minSampleSize;
             renderImage.GetPixels()[imgArrayIndex].r = result.r * 255;
             renderImage.GetPixels()[imgArrayIndex].g = result.g * 255;
             renderImage.GetPixels()[imgArrayIndex].b = result.b * 255;
