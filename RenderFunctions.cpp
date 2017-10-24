@@ -24,7 +24,7 @@ float actualHeight, actualWidth;
 //Render Parameters
 const int minSampleSize = 4;
 const int maxSampleSize = 16;
-const float targetVariance = 0.05;
+const float targetVariance = 0.00005;
 const int sampleIncrement = 1;
 
 //Prototypes
