@@ -35,13 +35,13 @@ void Render(PixelIterator& i)
     
     while (i.GetPixelLocation(x, y)) {
         //Sample Array
-        Point3 currentPoint[sampleSize];
-        Ray r[sampleSize];
-        bool hitResult[sampleSize];
+//        Point3 currentPoint[sampleSize];
+//        Ray r[sampleSize];
+//        bool hitResult[sampleSize];
         
-        for (int sampleIndex = 0; index < sampleIndex; sampleIndex++) {
-            <#statements#>
-        }
+//        for (int sampleIndex = 0; index < sampleIndex; sampleIndex++) {
+//            <#statements#>
+//        }
         
         //Find current point and generate ray
         Point3 currentPoint = CalculateCurrentPoint(x, y, 0.5, 0.5, imgOrigin);
