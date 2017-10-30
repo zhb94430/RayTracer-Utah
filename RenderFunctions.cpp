@@ -23,7 +23,7 @@ float actualHeight, actualWidth;
 
 //Render Parameters
 const int minSampleSize = 4;
-const int maxSampleSize = 16;
+const int maxSampleSize = 64;
 const float targetVariance = 0.00005;
 const int sampleIncrement = 1;
 
@@ -35,7 +35,7 @@ Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffset
 //Main Render Function
 void Render(PixelIterator& i)
 {
-    Point3 imgOrigin = CalculateImageOrigin(1.0);
+    Point3 imgOrigin;
     int x, y;
     
     while (i.GetPixelLocation(x, y)) {
@@ -52,17 +52,26 @@ void Render(PixelIterator& i)
         
         //Populate the two hitinfo array
         for (int index = 0; index < minSampleSize; index++) {
+            imgOrigin = CalculateImageOrigin(camera.focaldist);
+            
             //Generate offset for current sample
             float currentOffset = index * pixelIncrement;
 //            float offsetX = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/pixelIncrement));
 //            float offsetY = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/pixelIncrement));
-            
             float offsetX = Halton(index, 4);
             float offsetY = Halton(index, 5);
             
+            //Generate random sample
+            float sampleR = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/camera.dof));
+            float sampleTheta = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2 * M_PI)));
+            float camOffsetX = sampleR * cos(sampleTheta);
+            float camOffsetY = sampleR * sin(sampleTheta);
+            
+            Point3 sampledPosition = camera.pos + camera.up * camOffsetY + camera.dir.GetNormalized().Cross(camera.up.GetNormalized()).GetNormalized() * camOffsetX;
+            
             //Find current point and generate ray
             Point3 currentPoint = CalculateCurrentPoint(x, y, currentOffset+offsetX, currentOffset+offsetY, imgOrigin);
-            rayArray[index] = Ray(camera.pos, (currentPoint - camera.pos).GetNormalized());
+            rayArray[index] = Ray(sampledPosition, (currentPoint - sampledPosition).GetNormalized());
             
             //Everything is stored in World Coordinate
             hitInfoArray[index] = HitInfo();
@@ -84,12 +93,6 @@ void Render(PixelIterator& i)
         
         //If hit, shade the pixel
         if (hitResultSum) {
-//            const char* sresult = h.node->GetName();
-//            const char* compare = "/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project5/teapot-low.obj";
-//            if (strcmp(sresult, compare )==0) {
-//                int x = 1;
-//            }
-//
             Color pixelValuesSum = Color(0.0, 0.0, 0.0);
             std::array<Color, maxSampleSize> pixelValueArray;
 
@@ -134,8 +137,16 @@ void Render(PixelIterator& i)
                         float offsetX = Halton(index, 4);
                         float offsetY = Halton(index, 5);
                         
+                        //Generate lens sample
+                        float sampleR = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/camera.dof));
+                        float sampleTheta = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2 * M_PI)));
+                        float camOffsetX = sampleR * cos(sampleTheta);
+                        float camOffsetY = sampleR * sin(sampleTheta);
+                        
+                        Point3 sampledPosition = camera.pos + camera.up * camOffsetY + camera.dir.GetNormalized().Cross(camera.up.GetNormalized()).GetNormalized() * camOffsetX;
+                        
                         Point3 currentPoint = CalculateCurrentPoint(x, y, offsetX, offsetY, imgOrigin);
-                        rayArray[index] = Ray(camera.pos, (currentPoint - camera.pos).GetNormalized());
+                        rayArray[index] = Ray(sampledPosition, (currentPoint - sampledPosition).GetNormalized());
                         
                         //Everything is stored in World Coordinate
                         hitInfoArray[index] = HitInfo();
@@ -146,31 +157,10 @@ void Render(PixelIterator& i)
                 }
             }
             
-//            if (pixelValues.r == 0 &&
-//                pixelValues.g == 0 &&
-//                pixelValues.b == 0) {
-//                int x = 1;
-//            }
-//
-//            if (x == 230 && y == 450) {
-//                int x = 1;
-//            }
-            
-//            Color pixelValues = Color(h.N.x, h.N.y, h.N.z);
-            
-//            pixelValues.ClampMinMax();
-            
-//            float rValue = pixelValues.r / (float)sampleSize;
-//            float gValue = pixelValues.g / (float)sampleSize;
-//            float bValue = pixelValues.b / (float)sampleSize;
-            
             pixelValuesSum /= (float)currentSampleCount;
             
             renderImage.GetSampleCount()[imgArrayIndex] = currentSampleCount;
-            
-            renderImage.GetPixels()[imgArrayIndex].r = pixelValuesSum.r * 255;
-            renderImage.GetPixels()[imgArrayIndex].g = pixelValuesSum.g * 255;
-            renderImage.GetPixels()[imgArrayIndex].b = pixelValuesSum.b * 255;
+            renderImage.GetPixels()[imgArrayIndex] = Color24(pixelValuesSum);
             renderImage.IncrementNumRenderPixel(1);
         }
         //Else, Sample background
@@ -230,7 +220,7 @@ bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
 Point3 CalculateImageOrigin(float distanceToImg)
 {
     Point3 result, topCenterPoint;
-
+    
     actualHeight = tan((camera.fov/2)*M_PI/180.0)*2*distanceToImg;
     actualWidth = ((float)camera.imgWidth/(float)camera.imgHeight) * actualHeight;
     
