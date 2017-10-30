@@ -36,7 +36,7 @@ void SpawnRenderThreads() {
     
     //#ifdef DEBUG
     //DEBUG PURPOSE
-//        CPUCoreNumber = 1;
+        CPUCoreNumber = 1;
     //#endif
     
     for (int j = 0; j < CPUCoreNumber; j++) {

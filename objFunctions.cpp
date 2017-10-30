@@ -584,7 +584,7 @@ float BVHBoxIntersection(const Ray &r, Box bvhBox, float t_max) {
     }
     
     if (tEntry <= tExit && tEntry < t_max) {
-        return tEntry + 0.001;
+        return tEntry + 0.01;
     }
     else {
         return -t_max;

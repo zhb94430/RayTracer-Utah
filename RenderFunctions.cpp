@@ -41,6 +41,10 @@ void Render(PixelIterator& i)
     while (i.GetPixelLocation(x, y)) {
         srand(time(NULL));
         
+        if (x == 494 && y == 327) {
+            int j = 0;
+        }
+        
         //Sample Array
         std::array<Ray, maxSampleSize> rayArray;
         std::array<HitInfo, maxSampleSize> hitInfoArray;
