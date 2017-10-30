@@ -141,8 +141,8 @@ bool Plane::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 
 //Bounding Box Intersection
 bool Box::IntersectRay(const Ray &r, float t_max) const {
-    Point3 allMin = Corner(0);
-    Point3 allMax = Corner(7);
+    Point3 allMin = pmin;
+    Point3 allMax = pmax;
     float tEntry;
     float tExit;
     
@@ -317,7 +317,7 @@ bool TriObj::IntersectTriangle(const Ray &ray, HitInfo &hInfo, int hitSide, unsi
                 hInfo.uvw = GetTexCoord(faceID, bc);
                 hInfo.N = GetNormal(faceID, bc).GetNormalized();
                 hInfo.z = t;
-                hInfo.p = GetPoint(faceID, bc) ;
+                hInfo.p = GetPoint(faceID, bc);
                 
                 return true;
             }
@@ -338,77 +338,152 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
         //Traverse Bounding Volume Hierarchy
         static const int STACK_MAX = 100;
         int stackTop = 0;
-        unsigned int BVHTraceStack[STACK_MAX];
+        unsigned int BVHTraceStack[STACK_MAX] = {0};
         
         BVHTraceStack[stackTop] = bvh.GetRootNodeID();
         
         //Start iteration
-//        while (stackTop >= 0) {
-//            unsigned int currentNodeIndex = BVHTraceStack[stackTop];
-//            stackTop--;
-//
-//            //If not a leaf node
-//            //Check which child node is closer
-//            if (!bvh.IsLeafNode(currentNodeIndex)) {
-//                unsigned int firstChildIndex = bvh.GetFirstChildNode(currentNodeIndex);
-//                unsigned int secondChildIndex = bvh.GetSecondChildNode(currentNodeIndex);
-//                Box child1Box = Box(bvh.GetNodeBounds(firstChildIndex));
-//                Box child2Box = Box(bvh.GetNodeBounds(secondChildIndex));
-//
-//                float child1TValue = BVHBoxIntersection(ray, child1Box, BIGFLOAT);
-//                float child2TValue = BVHBoxIntersection(ray, child2Box, BIGFLOAT);
-//
-//                if (child1TValue > 0) {
-//                    if (child2TValue > 0) {
-//                        if (child1TValue <= child2TValue) {
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = secondChildIndex;
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = firstChildIndex;
-//                        }
-//                        else {
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = firstChildIndex;
-//                            stackTop++;
-//                            BVHTraceStack[stackTop] = secondChildIndex;
-//                        }
-//                    }
-//                    else {
-//                        stackTop++;
-//                        BVHTraceStack[stackTop] = firstChildIndex;
-//                    }
-//                }
-//                else if (child2TValue > 0) {
-//                    stackTop++;
-//                    BVHTraceStack[stackTop] = secondChildIndex;
-//                }
-//            }
-//            //Intersect with leaf node
-//            else {
-//                //Iterate through all faces
-//                for (int i = 0; i < bvh.GetNodeElementCount(currentNodeIndex); i++) {
-//                    hitResult |= IntersectTriangle(ray, hInfo, hitSide, bvh.GetNodeElements(currentNodeIndex)[i]);
-//                }
-//            }
-//        }
+        while (stackTop >= 0) {
+            unsigned int currentNodeIndex = BVHTraceStack[stackTop];
+            stackTop--;
+
+            //If not a leaf node
+            //Check which child node is closer
+            if (!bvh.IsLeafNode(currentNodeIndex)) {
+                unsigned int firstChildIndex = bvh.GetFirstChildNode(currentNodeIndex);
+                unsigned int secondChildIndex = bvh.GetSecondChildNode(currentNodeIndex);
+                Box child1Box = Box(bvh.GetNodeBounds(firstChildIndex));
+                Box child2Box = Box(bvh.GetNodeBounds(secondChildIndex));
+
+                float child1TValue = BVHBoxIntersection(ray, child1Box, BIGFLOAT);
+                float child2TValue = BVHBoxIntersection(ray, child2Box, BIGFLOAT);
+
+                // if (child1TValue > 0) {
+                //     if (child2TValue > 0) {
+                //         if (child1TValue <= child2TValue) {
+                //             stackTop++;
+                //             BVHTraceStack[stackTop] = secondChildIndex;
+                //             stackTop++;
+                //             BVHTraceStack[stackTop] = firstChildIndex;
+                //         }
+                //         else {
+                //             stackTop++;
+                //             BVHTraceStack[stackTop] = firstChildIndex;
+                //             stackTop++;
+                //             BVHTraceStack[stackTop] = secondChildIndex;
+                //         }
+                //     }
+                //     else {
+                //         stackTop++;
+                //         BVHTraceStack[stackTop] = firstChildIndex;
+                //     }
+                // }
+                // else if (child2TValue > 0) {
+                //     stackTop++;
+                //     BVHTraceStack[stackTop] = secondChildIndex;
+                // }
+
+                // if (child1TValue <= child2TValue && child1TValue > 0)
+                // {
+                //     stackTop++;
+                //     BVHTraceStack[stackTop] = secondChildIndex;
+                //     stackTop++;
+                //     BVHTraceStack[stackTop] = firstChildIndex;
+                // }
+                // else if (child2TValue <= child1TValue && child2TValue > 0)
+                // {
+                //     stackTop++;
+                //     BVHTraceStack[stackTop] = firstChildIndex;
+                //     stackTop++;
+                //     BVHTraceStack[stackTop] = secondChildIndex;
+                // }
+                // else if (child1TValue > 0 && child2TValue <= 0)
+                // {
+                //     stackTop++;
+                //     BVHTraceStack[stackTop] = firstChildIndex;
+                // }
+                // else if (child2TValue > 0 && child1TValue <= 0)
+                // {
+                //     stackTop++;
+                //     BVHTraceStack[stackTop] = secondChildIndex;
+                // }
+
+                if (child1TValue <= child2TValue)
+                {
+                    if (child2TValue > 0)
+                    {
+                        stackTop++;
+                        BVHTraceStack[stackTop] = secondChildIndex;
+                    }
+
+                    if (child1TValue > 0)
+                    {
+                        stackTop++;
+                        BVHTraceStack[stackTop] = firstChildIndex;
+                    }
+                }
+
+                else if (child1TValue > child2TValue)
+                {
+                    if (child1TValue > 0)
+                    {
+                        stackTop++;
+                        BVHTraceStack[stackTop] = firstChildIndex;
+                    }
+
+                    if (child2TValue > 0)
+                    {
+                        stackTop++;
+                        BVHTraceStack[stackTop] = secondChildIndex;
+                    }
+                }
+
+
+//                 if (child1TValue < child2TValue)
+//                 {
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = secondChildIndex;
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = firstChildIndex;
+//                 }
+//                 else {
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = firstChildIndex;
+//                     stackTop++;
+//                     BVHTraceStack[stackTop] = secondChildIndex;
+//                 }
+
+                // stackTop++;
+                // BVHTraceStack[stackTop] = secondChildIndex;
+                // stackTop++;
+                // BVHTraceStack[stackTop] = firstChildIndex;
+            }
+            //Intersect with leaf node
+            else {
+                //Iterate through all faces
+                for (int i = 0; i < bvh.GetNodeElementCount(currentNodeIndex); i++) {
+                    hitResult |= IntersectTriangle(ray, hInfo, hitSide, bvh.GetNodeElements(currentNodeIndex)[i]);
+                }
+            }
+        }
         
         //Iterate through all faces
-        for (int i = 0; i < NF(); i++) {
-            hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
-        }
+       // for (int i = 0; i < NF(); i++) {
+       //     hitResult |= IntersectTriangle(ray, hInfo, hitSide, i);
+       // }
     }
     return hitResult;
 }
 
 float BVHBoxIntersection(const Ray &r, Box bvhBox, float t_max) {
-    Point3 allMin = bvhBox.Corner(0);
-    Point3 allMax = bvhBox.Corner(7);
+    Point3 allMin = bvhBox.pmin;
+    Point3 allMax = bvhBox.pmax;
     float tEntry;
     float tExit;
     
     //Special Cases
     if (bvhBox.IsEmpty()) {
-        return -1.0;
+        return -t_max;
     }
     
     if (r.dir.x == 0) {
@@ -512,6 +587,6 @@ float BVHBoxIntersection(const Ray &r, Box bvhBox, float t_max) {
         return tEntry + 0.001;
     }
     else {
-        return -1.0;
+        return -t_max;
     }
 }
