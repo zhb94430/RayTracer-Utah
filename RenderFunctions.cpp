@@ -22,8 +22,8 @@ extern TexturedColor background;
 float actualHeight, actualWidth;
 
 //Render Parameters
-const int minSampleSize = 4;
-const int maxSampleSize = 64;
+const int minSampleSize = 8;
+const int maxSampleSize = 128;
 const float targetVariance = 0.00005;
 const int sampleIncrement = 1;
 
@@ -41,9 +41,9 @@ void Render(PixelIterator& i)
     while (i.GetPixelLocation(x, y)) {
         srand(time(NULL));
         
-        if (x == 494 && y == 327) {
-            int j = 0;
-        }
+//        if (x == 494 && y == 327) {
+//            int j = 0;
+//        }
         
         //Sample Array
         std::array<Ray, maxSampleSize> rayArray;

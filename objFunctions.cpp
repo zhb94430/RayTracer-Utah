@@ -358,65 +358,15 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
                 float child1TValue = BVHBoxIntersection(ray, child1Box, BIGFLOAT);
                 float child2TValue = BVHBoxIntersection(ray, child2Box, BIGFLOAT);
 
-                // if (child1TValue > 0) {
-                //     if (child2TValue > 0) {
-                //         if (child1TValue <= child2TValue) {
-                //             stackTop++;
-                //             BVHTraceStack[stackTop] = secondChildIndex;
-                //             stackTop++;
-                //             BVHTraceStack[stackTop] = firstChildIndex;
-                //         }
-                //         else {
-                //             stackTop++;
-                //             BVHTraceStack[stackTop] = firstChildIndex;
-                //             stackTop++;
-                //             BVHTraceStack[stackTop] = secondChildIndex;
-                //         }
-                //     }
-                //     else {
-                //         stackTop++;
-                //         BVHTraceStack[stackTop] = firstChildIndex;
-                //     }
-                // }
-                // else if (child2TValue > 0) {
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = secondChildIndex;
-                // }
-
-                // if (child1TValue <= child2TValue && child1TValue > 0)
-                // {
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = secondChildIndex;
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = firstChildIndex;
-                // }
-                // else if (child2TValue <= child1TValue && child2TValue > 0)
-                // {
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = firstChildIndex;
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = secondChildIndex;
-                // }
-                // else if (child1TValue > 0 && child2TValue <= 0)
-                // {
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = firstChildIndex;
-                // }
-                // else if (child2TValue > 0 && child1TValue <= 0)
-                // {
-                //     stackTop++;
-                //     BVHTraceStack[stackTop] = secondChildIndex;
-                // }
-
                 if (child1TValue <= child2TValue)
                 {
-                    if (child2TValue > 0)
+                    if (child2TValue != BIGFLOAT)
                     {
                         stackTop++;
                         BVHTraceStack[stackTop] = secondChildIndex;
                     }
 
-                    if (child1TValue > 0)
+                    if (child1TValue != BIGFLOAT)
                     {
                         stackTop++;
                         BVHTraceStack[stackTop] = firstChildIndex;
@@ -425,38 +375,18 @@ bool TriObj::IntersectRay(const Ray &ray, HitInfo &hInfo, int hitSide) const
 
                 else if (child1TValue > child2TValue)
                 {
-                    if (child1TValue > 0)
+                    if (child1TValue != BIGFLOAT)
                     {
                         stackTop++;
                         BVHTraceStack[stackTop] = firstChildIndex;
                     }
 
-                    if (child2TValue > 0)
+                    if (child2TValue != BIGFLOAT)
                     {
                         stackTop++;
                         BVHTraceStack[stackTop] = secondChildIndex;
                     }
                 }
-
-
-//                 if (child1TValue < child2TValue)
-//                 {
-//                     stackTop++;
-//                     BVHTraceStack[stackTop] = secondChildIndex;
-//                     stackTop++;
-//                     BVHTraceStack[stackTop] = firstChildIndex;
-//                 }
-//                 else {
-//                     stackTop++;
-//                     BVHTraceStack[stackTop] = firstChildIndex;
-//                     stackTop++;
-//                     BVHTraceStack[stackTop] = secondChildIndex;
-//                 }
-
-                // stackTop++;
-                // BVHTraceStack[stackTop] = secondChildIndex;
-                // stackTop++;
-                // BVHTraceStack[stackTop] = firstChildIndex;
             }
             //Intersect with leaf node
             else {
@@ -587,6 +517,6 @@ float BVHBoxIntersection(const Ray &r, Box bvhBox, float t_max) {
         return tEntry + 0.01;
     }
     else {
-        return -t_max;
+        return t_max;
     }
 }
