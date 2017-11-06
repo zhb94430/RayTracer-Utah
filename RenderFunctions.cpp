@@ -220,6 +220,33 @@ bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
     return currentNodeIsHit;
 }
 
+//Shadow Trace function
+bool ShadowTrace(const Ray& r, Node* currentNode, HitInfo& hInfo)
+{
+    bool currentNodeIsHit = false;
+    
+    //If current node has an object, intersect and check children
+    if (currentNode->GetNodeObj() != nullptr) {
+        currentNodeIsHit = currentNode->GetNodeObj()->IntersectRay(currentNode->ToNodeCoords(r), hInfo);
+        if (currentNodeIsHit) {
+            return true;
+        }
+    }
+    
+    //Keep testing children
+    if (currentNode->GetNumChild() > 0) {
+        for (int i = 0; i < currentNode->GetNumChild(); i++) {
+            bool childIsHit = ShadowTrace(currentNode->ToNodeCoords(r), currentNode->GetChild(i), hInfo);
+            if (childIsHit) {
+                return true;
+            }
+            currentNodeIsHit = currentNodeIsHit | childIsHit;
+        }
+    }
+    
+    return currentNodeIsHit;
+}
+
 //Calculate the origin of the image in world space
 Point3 CalculateImageOrigin(float distanceToImg)
 {

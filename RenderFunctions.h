@@ -10,5 +10,6 @@
 #define _RENDERFUNC_H_INCLUDED_
 
 bool Trace(const Ray &r, Node* currentNode, HitInfo &hInfo);
+bool ShadowTrace(const Ray& r, Node* currentNode, HitInfo& hInfo);
 
 #endif
