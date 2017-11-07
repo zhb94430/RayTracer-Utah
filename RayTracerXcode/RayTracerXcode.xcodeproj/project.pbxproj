@@ -90,9 +90,9 @@
 		D001070A1F4E2D360056FD76 /* RayTracerXcode */ = {
 			isa = PBXGroup;
 			children = (
-				D057C4781F5F426B00344B39 /* RenderFunctions.h */,
 				D00107121F4E2D470056FD76 /* ExternalLibrary */,
 				D00107131F4E2D470056FD76 /* main.cpp */,
+				D057C4781F5F426B00344B39 /* RenderFunctions.h */,
 				D00107281F50AD980056FD76 /* RenderFunctions.cpp */,
 				D001072F1F57CC0F0056FD76 /* mtlFunctions.cpp */,
 				D00107311F57CC240056FD76 /* objFunctions.cpp */,
@@ -279,6 +279,7 @@
 			buildSettings = {
 				DEVELOPMENT_TEAM = MB28XTY8UD;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "USE_GLUT=1";
 				GCC_VERSION = "";
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";

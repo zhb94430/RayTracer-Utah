@@ -56,11 +56,16 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
     
     //Reflection & Refraction
     if (bounceCount > 0) {
-        
         //If a refraction property exists
         if (refraction.Sample(hInfo.uvw) != Color(0,0,0)) {
+            
+            // Glossiness Sampling
+            Point3 sampleOrigin = hInfo.p+hInfo.N;
+            Point3 sampledOffset = SampleSphereHalton(sampleOrigin, refractionGlossiness);
+            Point3 sampledNormal = (sampleOrigin + sampledOffset - hInfo.p).GetNormalized();
+            
             //Calcluate the refracted ray direction
-            float cosTheta1 = hInfo.N.Dot(-ray.dir);
+            float cosTheta1 = sampledNormal.Dot(-ray.dir);
             float sinTheta1 = sqrt(1-pow(cosTheta1,2));
             
             //Account for floating point precision
@@ -95,11 +100,11 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                 cosTheta2 = 1.0;
             }
             
-            Point3 SVector = hInfo.N.Cross(hInfo.N.Cross(-ray.dir).GetNormalized()).GetNormalized();
+            Point3 SVector = sampledNormal.Cross(sampledNormal.Cross(-ray.dir).GetNormalized()).GetNormalized();
             
             if (sinTheta2 > 1) {
                 //Total Internal Reflection
-                Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(hInfo.N)*hInfo.N).GetNormalized();
+                Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(sampledNormal)*sampledNormal).GetNormalized();
                 
                 Ray reflected = Ray(hInfo.p, reflectedDirection);
                 HitInfo reflectedHInfo;
@@ -116,7 +121,12 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                 }
             }
             else {
-                Point3 refractedDirection = (-(hInfo.N)*cosTheta2 + SVector*sinTheta2).GetNormalized();
+                // Glossiness Sampling
+                Point3 sampleOrigin = hInfo.p+hInfo.N;
+                Point3 sampledOffset = SampleSphereHalton(sampleOrigin, refractionGlossiness);
+                Point3 sampledNormal = (sampleOrigin + sampledOffset - hInfo.p).GetNormalized();
+                
+                Point3 refractedDirection = (-(sampledNormal)*cosTheta2 + SVector*sinTheta2).GetNormalized();
                 
                 Ray refracted = Ray(hInfo.p, refractedDirection);
                 HitInfo refractedHInfo;
@@ -126,7 +136,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                     float R0 = pow((n1-n2)/(n1+n2), 2);
                     float ShlicksApprox = R0 + (1.0-R0)*pow((1.0-cosTheta1), 5);
                     
-                    Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(hInfo.N)*hInfo.N).GetNormalized();
+                    Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(sampledNormal)*sampledNormal).GetNormalized();
                     
                     Ray reflected = Ray(hInfo.p, reflectedDirection);
                     HitInfo reflectedHInfo;
@@ -161,8 +171,13 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
         
         //If a reflection property exists
         if (reflection.Sample(hInfo.uvw) != Color(0,0,0)) {
+            // Glossiness Sampling
+            Point3 sampleOrigin = hInfo.p+hInfo.N;
+            Point3 sampledOffset = SampleSphereHalton(sampleOrigin, reflectionGlossiness);
+            Point3 sampledNormal = (sampleOrigin + sampledOffset - hInfo.p).GetNormalized();
+            
             //Calculate the reflected ray direction
-            Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(hInfo.N)*hInfo.N).GetNormalized();
+            Point3 reflectedDirection = (ray.dir - 2*ray.dir.Dot(sampledNormal)*sampledNormal).GetNormalized();
             
             Ray reflected = Ray(hInfo.p, reflectedDirection);
             HitInfo reflectedHInfo;

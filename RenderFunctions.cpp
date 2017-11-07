@@ -23,14 +23,16 @@ float actualHeight, actualWidth;
 
 //Render Parameters
 const int minSampleSize = 8;
-const int maxSampleSize = 128;
-const float targetVariance = 0.00005;
+const int maxSampleSize = 64;
+const float targetVariance = 0.0005;
 const int sampleIncrement = 1;
+
+//Sampling Variables
+int HaltonIndex = 0;
 
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
-
 
 //Main Render Function
 void Render(PixelIterator& i)
@@ -41,9 +43,9 @@ void Render(PixelIterator& i)
     while (i.GetPixelLocation(x, y)) {
         srand(time(NULL));
         
-//        if (x == 494 && y == 327) {
-//            int j = 0;
-//        }
+        if (x == 396 && y == 239) {
+            int j = 0;
+        }
         
         //Sample Array
         std::array<Ray, maxSampleSize> rayArray;
@@ -275,4 +277,28 @@ Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffset
     
     return result;
 }
+
+//Sample a sphere
+Point3 SampleSphereHalton(Point3 origin, float radius)
+{
+//    float rand1 = Halton(HaltonIndex, 4) * radius;
+//    float rand2 = Halton(HaltonIndex, 5) * radius;
+//    float rand3 = Halton(HaltonIndex, 6) * radius;
+//
+//    HaltonIndex++;
+
+    float rand1 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
+    float rand2 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
+    float rand3 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
+
+    Point3 offset = Point3(rand1,rand2,rand3);
+    
+    if (offset.Length() > radius) {
+        offset = SampleSphereHalton(origin, radius);
+    }
+    
+    return offset;
+}
+
+//Sample a circle
 

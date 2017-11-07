@@ -34,10 +34,10 @@ void SpawnRenderThreads() {
         CPUCoreNumber = 1;
     }
     
-    //#ifdef DEBUG
-    //DEBUG PURPOSE
+//    #if DEBUG
+//    DEBUG PURPOSE
 //        CPUCoreNumber = 1;
-    //#endif
+//    #endif
     
     for (int j = 0; j < CPUCoreNumber; j++) {
         std::thread(Render, std::ref(i)).detach();
