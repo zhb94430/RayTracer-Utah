@@ -23,7 +23,7 @@ float actualHeight, actualWidth;
 
 //Render Parameters
 const int minSampleSize = 8;
-const int maxSampleSize = 64;
+const int maxSampleSize = 128;
 const float targetVariance = 0.0005;
 const int sampleIncrement = 1;
 
@@ -281,15 +281,15 @@ Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffset
 //Sample a sphere
 Point3 SampleSphereHalton(Point3 origin, float radius)
 {
-//    float rand1 = Halton(HaltonIndex, 4) * radius;
-//    float rand2 = Halton(HaltonIndex, 5) * radius;
-//    float rand3 = Halton(HaltonIndex, 6) * radius;
-//
-//    HaltonIndex++;
+    float rand1 = Halton(HaltonIndex, 4) * radius;
+    float rand2 = Halton(HaltonIndex, 5) * radius;
+    float rand3 = Halton(HaltonIndex, 6) * radius;
 
-    float rand1 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
-    float rand2 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
-    float rand3 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
+    HaltonIndex++;
+
+//    float rand1 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
+//    float rand2 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
+//    float rand3 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
 
     Point3 offset = Point3(rand1,rand2,rand3);
     
