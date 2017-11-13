@@ -280,11 +280,12 @@ Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffset
 Point3 SampleSphereHalton(Point3 origin, float radius)
 {
     float rand1 = Halton(HaltonIndex, 4) * radius;
-    float rand2 = Halton(HaltonIndex, 5) * radius;
-    float rand3 = Halton(HaltonIndex, 6) * radius;
-
     HaltonIndex++;
-
+    float rand2 = Halton(HaltonIndex, 5) * radius;
+    HaltonIndex++;
+    float rand3 = Halton(HaltonIndex, 6) * radius;
+    HaltonIndex++;
+    
 //    float rand1 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
 //    float rand2 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
 //    float rand3 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));

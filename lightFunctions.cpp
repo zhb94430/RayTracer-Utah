@@ -50,7 +50,7 @@ Color PointLight::Illuminate(const Point3 &p, const Point3 &N) const {
     
         Ray shadowRay = Ray(p, (currentSamplePos - p).GetNormalized());
 
-        shadowIntensity += Shadow(shadowRay);
+        shadowIntensity += Shadow(shadowRay, (p-currentSamplePos).Length());
 
         if (i == shadowSampleMin) {
             if (shadowIntensity == shadowSampleMin*1.0) {
@@ -63,4 +63,17 @@ Color PointLight::Illuminate(const Point3 &p, const Point3 &N) const {
     
     return result * intensity;
 }
+
+// Indirect Illumination Implementation
+
+class IndirectSample : public GenLight
+{
+public:
+    virtual Color    Illuminate(const Point3 &p, const Point3 &N) const=0;
+    virtual Point3    Direction (const Point3 &p) const=0;
+    virtual bool    IsAmbient () const { return true; }
+    virtual void    SetViewportLight(int lightID) const {}    // used for OpenGL display
+private:
+    
+};
 

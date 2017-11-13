@@ -186,7 +186,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
                 result += reflection.Sample(hInfo.uvw) * reflectedHInfo.node->GetMaterial()->Shade(reflected, reflectedHInfo, lights, bounceCount-1);
             }
             else {
-                result += environment.SampleEnvironment(reflectedDirection);
+                result += environment.SampleEnvironment(reflectedDirection) * reflection.GetColor();
             }
         }
     }
