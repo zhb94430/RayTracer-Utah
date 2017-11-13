@@ -2,8 +2,8 @@
 ///
 /// \file       scene.h 
 /// \author     Cem Yuksel (www.cemyuksel.com)
-/// \version    9.0
-/// \date       October 23, 2017
+/// \version    11.0
+/// \date       November 6, 2017
 ///
 /// \brief Example source for CS 6620 - University of Utah.
 ///
@@ -535,6 +535,7 @@ private:
 	uchar	*zbufferImg;
 	uchar	*sampleCount;
 	uchar	*sampleCountImg;
+	uchar	*irradComp;
 	int		width, height;
 	std::atomic<int> numRenderedPixels;
 public:
@@ -553,7 +554,14 @@ public:
 		sampleCount = new uchar[width*height];;
 		if ( sampleCountImg ) delete [] sampleCountImg;
 		sampleCountImg = NULL;
+		if ( irradComp ) delete [] irradComp;
+		irradComp = NULL;
 		ResetNumRenderedPixels();
+	}
+	void AllocateIrradianceComputationImage()
+	{
+		if ( ! irradComp ) irradComp = new uchar[width*height];
+		for ( int i=0; i<width*height; i++ ) irradComp[i] = 0;
 	}
 
 	int			GetWidth() const	{ return width; }
@@ -563,6 +571,7 @@ public:
 	uchar*		GetZBufferImage()	{ return zbufferImg; }
 	uchar*		GetSampleCount()	{ return sampleCount; }
 	uchar*		GetSampleCountImage(){ return sampleCountImg; }
+	uchar*		GetIrradianceComputationImage() { return irradComp; }
 
 	void	ResetNumRenderedPixels()		{ numRenderedPixels=0; }
 	int		GetNumRenderedPixels() const	{ return numRenderedPixels; }
@@ -620,6 +629,7 @@ public:
 	bool SaveImage (const char *filename) const { return SavePNG(filename,&img[0].r,3); }
 	bool SaveZImage(const char *filename) const { return SavePNG(filename,zbufferImg,1); }
 	bool SaveSampleCountImage(const char *filename) const { return SavePNG(filename,sampleCountImg,1); }
+	bool SaveIrradianceComputationImage(const char *filename) const { return SavePNG(filename,irradComp,1); }
 
 private:
 	bool SavePNG(const char *filename, uchar *data, int compCount) const
