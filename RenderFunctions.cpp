@@ -174,9 +174,7 @@ void Render(PixelIterator& i)
             Color result = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
 
             renderImage.GetSampleCount()[imgArrayIndex] = minSampleSize;
-            renderImage.GetPixels()[imgArrayIndex].r = result.r * 255;
-            renderImage.GetPixels()[imgArrayIndex].g = result.g * 255;
-            renderImage.GetPixels()[imgArrayIndex].b = result.b * 255;
+            renderImage.GetPixels()[imgArrayIndex] = Color24(result);
             renderImage.IncrementNumRenderPixel(1);
         }
 
