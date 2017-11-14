@@ -35,6 +35,16 @@ public:
 	virtual void SetViewportLight(int lightID) const { SetViewportParam(lightID,ColorA(intensity),ColorA(0.0f),Point4(0,0,0,1)); }
 
 	void SetIntensity(Color intens) { intensity=intens; }
+    
+    //Peter, Nov13
+    virtual AmbientLight* clone() const
+    {
+        AmbientLight* result = new AmbientLight();
+        
+        result->SetIntensity(this->intensity);
+        
+        return result;
+    }
 private:
 	Color intensity;
 };
@@ -51,6 +61,17 @@ public:
 
 	void SetIntensity(Color intens) { intensity=intens; }
 	void SetDirection(Point3 dir) { direction=dir.GetNormalized(); }
+    
+    //Peter, Nov13
+    virtual DirectLight* clone() const
+    {
+        DirectLight* result = new DirectLight();
+        
+        result->SetIntensity(this->intensity);
+        result->SetDirection(this->direction);
+        
+        return result;
+    }
 private:
 	Color intensity;
 	Point3 direction;
@@ -69,6 +90,18 @@ public:
 	void SetPosition(Point3 pos) { position=pos; }
 	void SetSize(float s) { size=s; }
 
+    //Peter, Nov13
+    virtual PointLight* clone() const
+    {
+        PointLight* result = new PointLight();
+        
+        result->SetIntensity(this->intensity);
+        result->SetPosition(this->position);
+        result->SetSize(this->size);
+        
+        return result;
+    }
+    
 private:
 	Color intensity;
 	Point3 position;

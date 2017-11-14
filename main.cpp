@@ -36,7 +36,7 @@ void SpawnRenderThreads() {
     
 //    #if DEBUG
 //    DEBUG PURPOSE
-//        CPUCoreNumber = 1;
+        CPUCoreNumber = 1;
 //    #endif
     
     for (int j = 0; j < CPUCoreNumber; j++) {
@@ -72,7 +72,7 @@ int main(int argc, const char* argv[])
     }
     //Load default scene if no sceneFile provided
     else {
-        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project10/scene.xml");
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project11/scene.xml");
     }
     
     ShowViewport();

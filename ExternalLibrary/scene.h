@@ -189,7 +189,7 @@ public:
 template <class T> class ItemList : public std::vector<T*>
 {
 public:
-	virtual ~ItemList() { DeleteAll(); }
+    virtual ~ItemList() { DeleteAll(); }
 	void DeleteAll() { int n=(int)this->size(); for ( int i=0; i<n; i++ ) if ( this->at(i) ) delete this->at(i); }
 };
 
@@ -284,6 +284,9 @@ public:
 	virtual Point3	Direction (const Point3 &p) const=0;
 	virtual bool	IsAmbient () const { return false; }
 	virtual void	SetViewportLight(int lightID) const {}	// used for OpenGL display
+
+    //Peter, Nov13
+    virtual Light* clone() const = 0;
 };
 
 class LightList : public ItemList<Light> {};

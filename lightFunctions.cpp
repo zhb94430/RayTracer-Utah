@@ -31,7 +31,6 @@ float GenLight::Shadow(Ray ray, float t_max) {
 Color PointLight::Illuminate(const Point3 &p, const Point3 &N) const {
     float shadowIntensity = 0.0;
 
-
     // Perform minimum shadow sample
     for (int i = 0; i < shadowSampleMax; i++) {
         // Generate random sample
@@ -66,14 +65,14 @@ Color PointLight::Illuminate(const Point3 &p, const Point3 &N) const {
 
 // Indirect Illumination Implementation
 
-class IndirectSample : public GenLight
-{
-public:
-    virtual Color    Illuminate(const Point3 &p, const Point3 &N) const=0;
-    virtual Point3    Direction (const Point3 &p) const=0;
-    virtual bool    IsAmbient () const { return true; }
-    virtual void    SetViewportLight(int lightID) const {}    // used for OpenGL display
-private:
-    
-};
+//class IndirectSample : public GenLight
+//{
+//public:
+//    virtual Color    Illuminate(const Point3 &p, const Point3 &N) const=0;
+//    virtual Point3    Direction (const Point3 &p) const=0;
+//    virtual bool    IsAmbient () const { return true; }
+//    virtual void    SetViewportLight(int lightID) const {}    // used for OpenGL display
+//private:
+//
+//};
 

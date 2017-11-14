@@ -292,7 +292,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = MB28XTY8UD;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "USE_GLUT=1";
 				GCC_VERSION = "";
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
