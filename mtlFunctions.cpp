@@ -28,7 +28,7 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             
             //Ambient Light
             if (currentLight->IsAmbient()) {
-                result += diffuse.Sample(hInfo.uvw) *currentLight->Illuminate(hInfo.p, hInfo.N);
+                result += diffuse.Sample(hInfo.uvw) * currentLight->Illuminate(hInfo.p, hInfo.N);
             }
             
             //Shading Happens in World Space

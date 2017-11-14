@@ -26,7 +26,8 @@ const int minSampleSize = 8;
 const int maxSampleSize = 128;
 const float targetVariance = 0.0005;
 const int sampleIncrement = 1;
-const int monteCarloSampleSize = 5;
+const int monteCarloSampleSize = 32;
+const int monteCarloBounces = 2;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -34,7 +35,7 @@ int HaltonIndex = 0;
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
-void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y);
+void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples);
 
 //Main Render Function
 void Render(PixelIterator& i)
@@ -117,19 +118,13 @@ void Render(PixelIterator& i)
                     
                     if (hitResult[index]) {
                         // Copy and Construct a new light list for monte carlo
-                        LightList copiedList;
-                        copiedList.reserve(lights.size());
-                        
-                        for (int index = 0; index < lights.size(); index++) {
-                            Light* currentLight = lights.at(index);
-                            
-                            copiedList.push_back(currentLight->clone());
-                        }
+                        LightList monteCarloList;
                         
                         // Monte Carlo
-                        MonteCarlo(copiedList, hitInfoArray[index], x, y);
+                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
                         
-                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], copiedList, 10);
+                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
+                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 10);
                     }
                     else {
                         currentResult = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
@@ -316,45 +311,53 @@ Point3 SampleSphereHalton(Point3 origin, float radius)
 }
 
 //Sample a hemisphere
-//TODO - FIX THIS?
 
 Point3 SampleHemiHalton(Point3 origin, Point3 normal, float radius)
 {
     Point3 offset = SampleSphereHalton(origin, radius);
     
-    Point3 direction = (offset - origin).GetNormalized();
+    Point3 direction = offset.GetNormalized();
     
     if (direction.Dot(normal) < 0) {
-        offset = SampleHemiHalton(origin, normal, radius);
+        offset = -offset;
     }
     
     return offset;
 }
 
 //Monte Carlo Sampling
-void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y)
+void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples)
 {
     Color c = Color(0.0, 0.0, 0.0);
     
-    // Sample a hemisphere on the hitpoint
-    for (int index = 0; index < monteCarloSampleSize; index++) {
-        // Data Structures
-        HitInfo h = HitInfo();
-        
-        // Create sample ray
-        Point3 sampleOffset = SampleHemiHalton(hInfo.p, hInfo.N, 1.0);
-        Ray sampleRay = Ray(hInfo.p, (sampleOffset-hInfo.p).GetNormalized());
-        
-        // Trace & Shade
-        if (Trace(sampleRay, &rootNode, h)) {
-            c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
+    if (bounces > 0)
+    {
+        // Sample a hemisphere on the hitpoint
+        for (int index = 0; index < numOfSamples; index++) {
+            // Data Structures
+            HitInfo h = HitInfo();
+            LightList currentSampleList;
+            
+            // Create sample ray
+            Point3 sampleOffset = SampleHemiHalton(hInfo.p, hInfo.N, 1.0);
+            Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
+            
+            // Trace & Shade
+            if (Trace(sampleRay, &rootNode, h)) {
+                MonteCarlo(currentSampleList, h, x, y, bounces-1, 1);
+                c += h.node->GetMaterial()->Shade(sampleRay, h, currentSampleList, 5);
+                c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
+            }
+            else {
+                c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+            }
         }
-        else {
-            c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
-        }
+        
+        c /= (float)monteCarloSampleSize;
     }
-    
-    c /= (float)monteCarloSampleSize;
+    else {
+        c = Color(0.1, 0.1, 0.1);
+    }
     
     AmbientLight* a = new AmbientLight();
     a->SetIntensity(c);
