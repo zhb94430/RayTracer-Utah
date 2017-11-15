@@ -24,10 +24,10 @@ float actualHeight, actualWidth;
 //Render Parameters
 const int minSampleSize = 8;
 const int maxSampleSize = 128;
-const float targetVariance = 0.0005;
+const float targetVariance = 0.005;
 const int sampleIncrement = 1;
-const int monteCarloSampleSize = 32;
-const int monteCarloBounces = 2;
+const int monteCarloSampleSize = 100;
+const int monteCarloBounces = 3;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -176,6 +176,11 @@ void Render(PixelIterator& i)
             
             pixelValuesSum /= (float)currentSampleCount;
             
+            // Gamma Correction
+            pixelValuesSum.r = pow(pixelValuesSum.r, 1/2.2);
+            pixelValuesSum.g = pow(pixelValuesSum.g, 1/2.2);
+            pixelValuesSum.b = pow(pixelValuesSum.b, 1/2.2);
+            
             renderImage.GetSampleCount()[imgArrayIndex] = currentSampleCount;
             renderImage.GetPixels()[imgArrayIndex] = Color24(pixelValuesSum);
             renderImage.IncrementNumRenderPixel(1);
@@ -184,6 +189,10 @@ void Render(PixelIterator& i)
         else {
             Color result = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
 
+            result.r = pow(result.r, 1/2.2);
+            result.g = pow(result.g, 1/2.2);
+            result.b = pow(result.b, 1/2.2);
+            
             renderImage.GetSampleCount()[imgArrayIndex] = minSampleSize;
             renderImage.GetPixels()[imgArrayIndex] = Color24(result);
             renderImage.IncrementNumRenderPixel(1);
@@ -290,16 +299,16 @@ Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffset
 //Sample a sphere
 Point3 SampleSphereHalton(Point3 origin, float radius)
 {
-    float rand1 = Halton(HaltonIndex, 4) * radius;
-    HaltonIndex++;
-    float rand2 = Halton(HaltonIndex, 5) * radius;
-    HaltonIndex++;
-    float rand3 = Halton(HaltonIndex, 6) * radius;
-    HaltonIndex++;
+//    float rand1 = Halton(HaltonIndex, 4) * radius;
+//    HaltonIndex++;
+//    float rand2 = Halton(HaltonIndex, 5) * radius;
+//    HaltonIndex++;
+//    float rand3 = Halton(HaltonIndex, 6) * radius;
+//    HaltonIndex++;
     
-//    float rand1 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
-//    float rand2 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
-//    float rand3 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/radius));
+    float rand1 = -radius + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(radius*2)));;
+    float rand2 = -radius + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(radius*2)));;
+    float rand3 = -radius + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(radius*2)));;
 
     Point3 offset = Point3(rand1,rand2,rand3);
     
