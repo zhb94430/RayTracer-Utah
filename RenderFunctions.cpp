@@ -119,10 +119,10 @@ void Render(PixelIterator& i)
                     if (hitResult[index]) {
                         // Copy and Construct a new light list for monte carlo
                         LightList monteCarloList;
-                        
+
                         // Monte Carlo
                         MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
-                        
+
                         currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
                         currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 10);
                     }
