@@ -11,6 +11,6 @@
 
 bool Trace(const Ray &r, Node* currentNode, HitInfo &hInfo);
 bool ShadowTrace(const Ray& r, Node* currentNode, HitInfo& hInfo);
-Point3 SampleSphereHalton(Point3 origin, float radius);
+Point3 SampleSphere(Point3 origin, float radius);
 
 #endif

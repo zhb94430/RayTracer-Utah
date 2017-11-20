@@ -23,11 +23,11 @@ float actualHeight, actualWidth;
 
 //Render Parameters
 const int minSampleSize = 8;
-const int maxSampleSize = 128;
+const int maxSampleSize = 32;
 const float targetVariance = 0.005;
 const int sampleIncrement = 1;
-const int monteCarloSampleSize = 100;
-const int monteCarloBounces = 3;
+const int monteCarloSampleSize = 1;
+const int monteCarloBounces = 4;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -71,10 +71,10 @@ void Render(PixelIterator& i)
             float offsetY = Halton(index, 5);
             
             //Generate random sample
-            float sampleR = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/camera.dof));
+            float sampleX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
             float sampleTheta = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2 * M_PI)));
-            float camOffsetX = sampleR * cos(sampleTheta);
-            float camOffsetY = sampleR * sin(sampleTheta);
+            float camOffsetX = sqrt(sampleX * camera.dof * camera.dof) * cos(sampleTheta);
+            float camOffsetY = sqrt(sampleX * camera.dof * camera.dof) * sin(sampleTheta);
             
             Point3 sampledPosition = camera.pos + camera.up * camOffsetY + camera.dir.GetNormalized().Cross(camera.up.GetNormalized()).GetNormalized() * camOffsetX;
             
@@ -296,8 +296,18 @@ Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffset
     return result;
 }
 
+//Sample a disk
+Point2 SampleDisk(float radius)
+{
+    float sampleX = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/1.0));
+    float sampleTheta = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2 * M_PI)));
+    
+    return Point2(sqrt(sampleX * camera.dof * camera.dof) * cos(sampleTheta),
+                  sqrt(sampleX * camera.dof * camera.dof) * sin(sampleTheta));
+}
+
 //Sample a sphere
-Point3 SampleSphereHalton(Point3 origin, float radius)
+Point3 SampleSphere(Point3 origin, float radius)
 {
 //    float rand1 = Halton(HaltonIndex, 4) * radius;
 //    HaltonIndex++;
@@ -313,7 +323,7 @@ Point3 SampleSphereHalton(Point3 origin, float radius)
     Point3 offset = Point3(rand1,rand2,rand3);
     
     if (offset.Length() > radius) {
-        offset = SampleSphereHalton(origin, radius);
+        offset = SampleSphere(origin, radius);
     }
     
     return offset;
@@ -321,15 +331,35 @@ Point3 SampleSphereHalton(Point3 origin, float radius)
 
 //Sample a hemisphere
 
-Point3 SampleHemiHalton(Point3 origin, Point3 normal, float radius)
+Point3 SampleHemiSphere(Point3 origin, Point3 normal, float radius)
 {
-    Point3 offset = SampleSphereHalton(origin, radius);
+    Point3 offset = SampleSphere(origin, radius);
     
     Point3 direction = offset.GetNormalized();
     
     if (direction.Dot(normal) < 0) {
         offset = -offset;
     }
+    
+    return offset;
+}
+
+//Cosine Weighted Hemisphere
+Point3 SampleHemiSphereCosine(Point3 origin, Point3 normal, float radius)
+{
+    Point3 offset;
+    
+    float sampleX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float samplePhi = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2 * M_PI)));
+    float sampleTheta = 0.5 * acos(1 - 2*sampleX);
+    
+    // Find two random vectors
+    Point3 v1 = normal.Cross(Point3(sampleX)).GetNormalized();
+    Point3 v2 = v1.Cross(normal).GetNormalized();
+    
+    offset = normal * (radius * cos(sampleTheta)) +
+             v1 * (radius * sin(sampleTheta) * cos(samplePhi)) +
+             v2 * (radius * sin(sampleTheta) * sin(samplePhi));
     
     return offset;
 }
@@ -348,7 +378,8 @@ void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int b
             LightList currentSampleList;
             
             // Create sample ray
-            Point3 sampleOffset = SampleHemiHalton(hInfo.p, hInfo.N, 1.0);
+//            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
+            Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
             Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
             
             // Trace & Shade
