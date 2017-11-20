@@ -28,6 +28,7 @@ const float targetVariance = 0.005;
 const int sampleIncrement = 1;
 const int monteCarloSampleSize = 1;
 const int monteCarloBounces = 4;
+const int pathTracingBounces = 5;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -36,6 +37,7 @@ int HaltonIndex = 0;
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
 void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples);
+Color PathTrace(const HitInfo &hInfo, int x, int y, int bounces);
 
 //Main Render Function
 void Render(PixelIterator& i)
@@ -117,14 +119,16 @@ void Render(PixelIterator& i)
                     Color currentResult = Color(0.0, 0.0, 0.0);
                     
                     if (hitResult[index]) {
-                        // Copy and Construct a new light list for monte carlo
-                        LightList monteCarloList;
-
-                        // Monte Carlo
-                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
-
-                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
-                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 10);
+//                        // Copy and Construct a new light list for monte carlo
+//                        LightList monteCarloList;
+//
+//                        // Monte Carlo
+//                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
+//
+//                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
+//                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 10);
+                        
+                        currentResult = PathTrace(hitInfoArray[index], x, y, pathTracingBounces);
                     }
                     else {
                         currentResult = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
@@ -362,6 +366,44 @@ Point3 SampleHemiSphereCosine(Point3 origin, Point3 normal, float radius)
              v2 * (radius * sin(sampleTheta) * sin(samplePhi));
     
     return offset;
+}
+
+//Path Tracing
+Color PathTrace(const HitInfo &hInfo, int x, int y, int bounces)
+{
+    Color c = Color(0.0, 0.0, 0.0);
+    
+    if (bounces > 0)
+    {
+        //Direct Light Sample
+        int directLightCount = 0;
+        
+        for (int i = 0; i < lights.size(); i++) {
+            Light* currentLight = lights[i];
+            
+            if (!currentLight->IsAmbient()) {
+                directLightCount++;
+                c += currentLight->Illuminate(hInfo.p, hInfo.N);
+            }
+        }
+        
+        c /= directLightCount;
+        
+        //Next Bounce
+        HitInfo hNext = HitInfo();
+        Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
+        Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
+        
+        if (Trace(sampleRay, &rootNode, hNext)) {
+            c += PathTrace(hNext, x, y, bounces-1);
+        }
+        else {
+            c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+        }
+        
+    }
+    
+    return c;
 }
 
 //Monte Carlo Sampling
