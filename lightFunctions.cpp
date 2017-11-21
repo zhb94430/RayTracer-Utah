@@ -13,14 +13,14 @@
 extern Node rootNode;
 extern LightList lights;
 
-int shadowSampleMax = 32;
-int shadowSampleMin = 8;
+int shadowSampleMax = 1;
+int shadowSampleMin = 1;
 
 float GenLight::Shadow(Ray ray, float t_max) {
     HitInfo h;
     h.z = t_max;
     
-    if (Trace(ray, &rootNode, h)) {
+    if (ShadowTrace(ray, &rootNode, h)) {
         if (h.z > 0.0) {
             return 0.0;
         }
@@ -34,7 +34,7 @@ Color PointLight::Illuminate(const Point3 &p, const Point3 &N) const {
 
     if (size > 0) {
         // Perform minimum shadow sample
-        for (int i = 0; i < shadowSampleMax; i++) {
+//        for (int i = 0; i < shadowSampleMax; i++) {
             // Generate random sample
             float sampleR = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/size));
             float sampleTheta = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2 * M_PI)));
@@ -52,15 +52,24 @@ Color PointLight::Illuminate(const Point3 &p, const Point3 &N) const {
             Ray shadowRay = Ray(p, (currentSamplePos - p).GetNormalized());
             
             shadowIntensity += Shadow(shadowRay, (p-currentSamplePos).Length());
-            
-            if (i == shadowSampleMin) {
-                if (shadowIntensity == shadowSampleMin*1.0) {
-                    return intensity;
-                }
-            }
-        }
         
-        result = shadowIntensity/(float)shadowSampleMax;
+//        One Shadow ray per sample
+        result = shadowIntensity;
+        
+//            if (i == shadowSampleMin) {
+//                if (shadowIntensity == shadowSampleMin*1.0) {
+//                    return intensity;
+//                }
+//            }
+//        }
+//        result = shadowIntensity/(float)shadowSampleMax;
+    }
+    else {
+        Ray shadowRay = Ray(p, (position - p).GetNormalized());
+        
+        shadowIntensity += Shadow(shadowRay, (position-p).Length());
+        
+        result = shadowIntensity;
     }
     
     return result * intensity;

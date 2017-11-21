@@ -50,8 +50,8 @@ void SpawnRenderThreads() {
     renderImage.SaveImage("Result.png");
     renderImage.ComputeZBufferImage();
     renderImage.SaveZImage("ZBuffer.png");
-    renderImage.ComputeSampleCountImage();
-    renderImage.SaveSampleCountImage("SampleCount.png");
+//    renderImage.ComputeSampleCountImage();
+//    renderImage.SaveSampleCountImage("SampleCount.png");
 }
 
 void BeginRender() {
@@ -72,7 +72,7 @@ int main(int argc, const char* argv[])
     }
     //Load default scene if no sceneFile provided
     else {
-        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project11/scene_glossy.xml");
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project11/scene_glossy_soft.xml");
     }
     
     ShowViewport();

@@ -53,7 +53,6 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
         }
     }
     
-    
     //Reflection & Refraction
     if (bounceCount > 0) {
         //If a refraction property exists
@@ -190,6 +189,9 @@ Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lig
             }
         }
     }
+    
+    // Emission
+//    result += emission.Sample(hInfo.uvw);
 
     return result;
 }

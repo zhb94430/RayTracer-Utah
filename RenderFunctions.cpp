@@ -23,12 +23,11 @@ float actualHeight, actualWidth;
 
 //Render Parameters
 const int minSampleSize = 8;
-const int maxSampleSize = 32;
+const int maxSampleSize = 1024;
 const float targetVariance = 0.005;
 const int sampleIncrement = 1;
 const int monteCarloSampleSize = 1;
 const int monteCarloBounces = 4;
-const int pathTracingBounces = 5;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -45,10 +44,12 @@ void Render(PixelIterator& i)
     Point3 imgOrigin;
     int x, y;
     
+    srand(time(NULL));
+    
     while (i.GetPixelLocation(x, y)) {
-        srand(time(NULL));
         
-        if (x == 396 && y == 239) {
+        
+        if (x == 403 && y == 323) {
             int j = 0;
         }
         
@@ -113,22 +114,20 @@ void Render(PixelIterator& i)
             float currentVariance = 100.0;
             
             // Adaptive Sampling
-            while (currentSampleCount < maxSampleSize && currentVariance > targetVariance) {
+            while (currentSampleCount < maxSampleSize /*&& currentVariance > targetVariance*/) {
                 // Shading Calculation
                 for (int index = currentStartIndex; index < currentSampleCount; index++) {
                     Color currentResult = Color(0.0, 0.0, 0.0);
                     
                     if (hitResult[index]) {
-//                        // Copy and Construct a new light list for monte carlo
-//                        LightList monteCarloList;
-//
-//                        // Monte Carlo
-//                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
-//
-//                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
-//                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 10);
-                        
-                        currentResult = PathTrace(hitInfoArray[index], x, y, pathTracingBounces);
+                        // Copy and Construct a new light list for monte carlo
+                        LightList monteCarloList;
+
+                        // Monte Carlo
+                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
+
+                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
+                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
                     }
                     else {
                         currentResult = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
@@ -368,44 +367,6 @@ Point3 SampleHemiSphereCosine(Point3 origin, Point3 normal, float radius)
     return offset;
 }
 
-//Path Tracing
-Color PathTrace(const HitInfo &hInfo, int x, int y, int bounces)
-{
-    Color c = Color(0.0, 0.0, 0.0);
-    
-    if (bounces > 0)
-    {
-        //Direct Light Sample
-        int directLightCount = 0;
-        
-        for (int i = 0; i < lights.size(); i++) {
-            Light* currentLight = lights[i];
-            
-            if (!currentLight->IsAmbient()) {
-                directLightCount++;
-                c += currentLight->Illuminate(hInfo.p, hInfo.N);
-            }
-        }
-        
-        c /= directLightCount;
-        
-        //Next Bounce
-        HitInfo hNext = HitInfo();
-        Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
-        Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
-        
-        if (Trace(sampleRay, &rootNode, hNext)) {
-            c += PathTrace(hNext, x, y, bounces-1);
-        }
-        else {
-            c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
-        }
-        
-    }
-    
-    return c;
-}
-
 //Monte Carlo Sampling
 void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples)
 {
@@ -426,8 +387,16 @@ void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int b
             
             // Trace & Shade
             if (Trace(sampleRay, &rootNode, h)) {
-                MonteCarlo(currentSampleList, h, x, y, bounces-1, 1);
-                c += h.node->GetMaterial()->Shade(sampleRay, h, currentSampleList, 5);
+                const Material* currentMaterial = h.node->GetMaterial();
+                
+                //Stop when hit a light
+                const char* sresult = currentMaterial->GetName();
+                const char* compare = "light";
+                if (strcmp(sresult, compare )!=0) {
+                    MonteCarlo(currentSampleList, h, x, y, bounces-1, 1);
+                    c += h.node->GetMaterial()->Shade(sampleRay, h, currentSampleList, 5);
+                }
+                
                 c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
             }
             else {
