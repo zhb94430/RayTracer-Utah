@@ -2,8 +2,8 @@
 ///
 /// \file       scene.h 
 /// \author     Cem Yuksel (www.cemyuksel.com)
-/// \version    11.0
-/// \date       November 6, 2017
+/// \version    13.0
+/// \date       November 22, 2017
 ///
 /// \brief Example source for CS 6620 - University of Utah.
 ///
@@ -189,7 +189,7 @@ public:
 template <class T> class ItemList : public std::vector<T*>
 {
 public:
-    virtual ~ItemList() { DeleteAll(); }
+	virtual ~ItemList() { DeleteAll(); }
 	void DeleteAll() { int n=(int)this->size(); for ( int i=0; i<n; i++ ) if ( this->at(i) ) delete this->at(i); }
 };
 
@@ -285,8 +285,10 @@ public:
 	virtual bool	IsAmbient () const { return false; }
 	virtual void	SetViewportLight(int lightID) const {}	// used for OpenGL display
 
-    //Peter, Nov13
-    virtual Light* clone() const = 0;
+	// Photon Extensions
+	virtual bool	IsPhotonSource()		const { return false; }
+	virtual Color	GetPhotonIntensity()	const { return Color(0,0,0); }
+	virtual Ray		RandomPhoton()			const { return Ray(Point3(0,0,0),Point3(0,0,1)); }
 };
 
 class LightList : public ItemList<Light> {};
@@ -303,6 +305,10 @@ public:
 	virtual Color Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const=0;
 
 	virtual void SetViewportMaterial(int subMtlID=0) const {}	// used for OpenGL display
+
+	// Photon Extensions
+	virtual bool IsPhotonSurface(int subMtlID=0) const { return true; }	// if this method returns true, the photon will be stored
+	virtual bool RandomPhotonBounce(Ray &r, Color &c, const HitInfo &hInfo) const { return false; }	// if this method returns true, a new photon with the given direction and color will be traced
 };
 
 class MaterialList : public ItemList<Material>
@@ -542,7 +548,7 @@ private:
 	int		width, height;
 	std::atomic<int> numRenderedPixels;
 public:
-	RenderImage() : img(NULL), zbuffer(NULL), zbufferImg(NULL), width(0), height(0), numRenderedPixels(0) {}
+	RenderImage() : img(NULL), zbuffer(NULL), zbufferImg(NULL), sampleCount(NULL), sampleCountImg(NULL), irradComp(NULL), width(0), height(0), numRenderedPixels(0) {}
 	void Init(int w, int h)
 	{
 		width=w;
@@ -554,7 +560,7 @@ public:
 		if (zbufferImg) delete [] zbufferImg;
 		zbufferImg = NULL;
 		if ( sampleCount ) delete [] sampleCount;
-		sampleCount = new uchar[width*height];;
+		sampleCount = new uchar[width*height];
 		if ( sampleCountImg ) delete [] sampleCountImg;
 		sampleCountImg = NULL;
 		if ( irradComp ) delete [] irradComp;

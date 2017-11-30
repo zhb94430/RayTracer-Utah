@@ -2,8 +2,8 @@
 ///
 /// \file       lights.h 
 /// \author     Cem Yuksel (www.cemyuksel.com)
-/// \version    10.0
-/// \date       October 30, 2017
+/// \version    13.0
+/// \date       November 20, 2017
 ///
 /// \brief Example source for CS 6620 - University of Utah.
 ///
@@ -35,16 +35,6 @@ public:
 	virtual void SetViewportLight(int lightID) const { SetViewportParam(lightID,ColorA(intensity),ColorA(0.0f),Point4(0,0,0,1)); }
 
 	void SetIntensity(Color intens) { intensity=intens; }
-    
-    //Peter, Nov13
-    virtual AmbientLight* clone() const
-    {
-        AmbientLight* result = new AmbientLight();
-        
-        result->SetIntensity(this->intensity);
-        
-        return result;
-    }
 private:
 	Color intensity;
 };
@@ -61,17 +51,6 @@ public:
 
 	void SetIntensity(Color intens) { intensity=intens; }
 	void SetDirection(Point3 dir) { direction=dir.GetNormalized(); }
-    
-    //Peter, Nov13
-    virtual DirectLight* clone() const
-    {
-        DirectLight* result = new DirectLight();
-        
-        result->SetIntensity(this->intensity);
-        result->SetDirection(this->direction);
-        
-        return result;
-    }
 private:
 	Color intensity;
 	Point3 direction;
@@ -85,23 +64,16 @@ public:
 	PointLight() : intensity(0,0,0), position(0,0,0), size(0) {}
 	virtual Color Illuminate(const Point3 &p, const Point3 &N) const;
 	virtual Point3 Direction(const Point3 &p) const { return (p-position).GetNormalized(); }
-	virtual void SetViewportLight(int lightID) const { SetViewportParam(lightID,ColorA(0.0f),ColorA(intensity),Point4(position,1.0f)); }
+	virtual void SetViewportLight(int lightID) const;
 	void SetIntensity(Color intens) { intensity=intens; }
 	void SetPosition(Point3 pos) { position=pos; }
 	void SetSize(float s) { size=s; }
 
-    //Peter, Nov13
-    virtual PointLight* clone() const
-    {
-        PointLight* result = new PointLight();
-        
-        result->SetIntensity(this->intensity);
-        result->SetPosition(this->position);
-        result->SetSize(this->size);
-        
-        return result;
-    }
-    
+	// Photon Extensions
+	virtual bool	IsPhotonSource()		const { return true; }
+	virtual Color	GetPhotonIntensity()	const { return intensity; }
+	virtual Ray		RandomPhoton()			const;
+
 private:
 	Color intensity;
 	Point3 position;
