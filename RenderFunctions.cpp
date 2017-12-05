@@ -213,7 +213,6 @@ void Render(PixelIterator& i)
 //Ray Tracing Logic
 //Recurse through all child nodes,
 //If an object exist, intersect ray, fill in hitinfo
-//TODO-- Recursion, Model Space transformation
 bool Trace(const Ray& r, Node* currentNode, HitInfo& hInfo)
 {
     bool currentNodeIsHit = false;

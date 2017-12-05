@@ -18,9 +18,47 @@ extern TexturedColor environment;
 
 bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, const HitInfo &hInfo) const
 {
+    float diffuseGray = diffuse.GetColor().Gray();
+    float specularGray = specular.GetColor().Gray();
+    float refractionGray = refraction.GetColor().Gray();
     
+    // Sum up material intensities
+    float sumGray = diffuseGray + specularGray + refractionGray;
     
-    return false;
+    // Add absorption
+    if (sumGray < 1.0) {
+        sumGray = 1.0;
+    }
+    
+    // Calculate Probability
+    float graySample = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/sumGray));
+    
+    // Decide Bounce type
+    if (graySample > diffuseGray)
+    {
+        if (graySample > diffuseGray+specularGray) {
+            if (graySample > diffuseGray+specularGray+refractionGray) {
+                // Absorption
+                return false;
+            }
+            else {
+                // Refraction
+                c = refraction.GetColor() / (refractionGray/sumGray);
+            }
+        }
+        else {
+            // Specular Bounce
+            c = specular.GetColor() / (specularGray/sumGray);
+            return Trace(r, &rootNode, hInfo);
+        }
+    }
+    else {
+        // Diffuse Bounce
+        c = diffuse.GetColor() / (diffuseGray/sumGray);
+        return Trace(r, &rootNode, hInfo);
+    }
+    
+    return true;
 }
 
 Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const
