@@ -33,6 +33,7 @@ const int monteCarloBounces = 4;
 const int photonMapSize = 1000000;
 const int photonMaxBounce = 10;
 const float photonEstRadius = 1.0;
+const float photonellipticity = 0.2;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -389,31 +390,28 @@ void GeneratePhotonMap()
             if (photonH.node->GetMaterial()->IsPhotonSurface()) {
                 // Record the first bounce
                 pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), photonIntensity);
-                
-                // Iteratively bounce the photon
-                for (int i = 0; i < photonMaxBounce; i++) {
-                    // Generate random bounce direction
-                    Point3 direction = SampleHemiSphere(photonH.p, photonH.N, 1.0);
-                    Ray nextPhotonRay = Ray(photonH.p, direction.GetNormalized());
-                    
-                    if (photonH.node->GetMaterial()->RandomPhotonBounce(nextPhotonRay, photonIntensity, photonH)) {
-                        pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), photonIntensity);
-                    }
-                    else {
-                        break;
-                    }
+            }
+            
+            Color currentIncomingIntensity = photonIntensity;
+            Color currentOutgoingIntensity = photonIntensity;
+            // Iteratively bounce the photon
+            for (int i = 0; i < photonMaxBounce; i++) {
+                // Generate random bounce direction
+                Point3 direction = SampleHemiSphere(photonH.p, photonH.N, 1.0);
+                Ray nextPhotonRay = Ray(photonH.p, direction.GetNormalized());
+                currentIncomingIntensity = currentOutgoingIntensity;
+
+                if (photonH.node->GetMaterial()->RandomPhotonBounce(nextPhotonRay, currentOutgoingIntensity, photonH)) {
+                    pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), currentIncomingIntensity);
+                }
+                else {
+                    break;
                 }
             }
         }
     }
     
     pMap.PrepareForIrradianceEstimation();
-}
-
-// Sample Photon Map after first path tracing
-void PhotonMapSampling()
-{
-    
 }
 
 //Monte Carlo Sampling

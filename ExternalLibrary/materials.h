@@ -46,7 +46,7 @@ public:
 
 	// Photon Extensions
 	virtual bool IsPhotonSurface(int subMtlID=0) const { return diffuse.GetColor().Gray() > 0; }	// if this method returns true, the photon will be stored
-	virtual bool RandomPhotonBounce(Ray &r, Color &c, const HitInfo &hInfo) const;	// if this method returns true, a new photon with the given direction and color will be traced
+	virtual bool RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const;	// if this method returns true, a new photon with the given direction and color will be traced
 
 private:
 	TexturedColor diffuse, specular, reflection, refraction, emission;
@@ -71,7 +71,7 @@ public:
 
 	// Photon Extensions
 	virtual bool IsPhotonSurface(int subMtlID=0) const { return mtls[subMtlID]->IsPhotonSurface(); }
-	virtual bool RandomPhotonBounce(Ray &r, Color &c, const HitInfo &hInfo) const { return hInfo.mtlID<(int)mtls.size() ? mtls[hInfo.mtlID]->RandomPhotonBounce(r,c,hInfo) : false; }
+	virtual bool RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const { return hInfo.mtlID<(int)mtls.size() ? mtls[hInfo.mtlID]->RandomPhotonBounce(r,c,hInfo) : false; }
 
 private:
 	std::vector<Material*> mtls;

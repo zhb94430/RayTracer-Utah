@@ -16,7 +16,7 @@ extern Camera camera;
 extern Node rootNode;
 extern TexturedColor environment;
 
-bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, const HitInfo &hInfo) const
+bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const
 {
     float diffuseGray = diffuse.GetColor().Gray();
     float specularGray = specular.GetColor().Gray();
@@ -43,22 +43,67 @@ bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, const HitInfo &hInfo) const
             }
             else {
                 // Refraction
+                //Calculate the reflected ray direction
+                Point3 sampleOrigin = hInfo.p+hInfo.N;
+                Point3 sampledOffset = SampleSphere(sampleOrigin, refractionGlossiness);
+                Point3 sampledNormal = (sampleOrigin + sampledOffset - hInfo.p).GetNormalized();
+                
+                //Calcluate the refracted ray direction
+                float cosTheta1 = sampledNormal.Dot(-r.dir);
+                float sinTheta1 = sqrt(1-pow(cosTheta1,2));
+                
+                //Account for floating point precision
+                if (sinTheta1 > 1) {
+                    sinTheta1 = 1.0;
+                }
+                
+                if (sinTheta1 < -1) {
+                    sinTheta1 = -1.0;
+                }
+                
+                if (cosTheta1 > 1) {
+                    cosTheta1 = 1.0;
+                }
+                
+                if (cosTheta1 < -1) {
+                    cosTheta1 = -1.0;
+                }
+                
+                //If front face hit, n2 = object ior, else n1 = object ior
+                float n1 = ior;
+                float n2 = 1.0;
+                if (hInfo.front) {
+                    n1 = 1.0;
+                    n2 = ior;
+                }
+                
+                float sinTheta2 = (n1/n2) * sinTheta1;
+                float cosTheta2 = sqrt(1 - sinTheta2 * sinTheta2);
+                
+                if (cosTheta2 > 1) {
+                    cosTheta2 = 1.0;
+                }
+                
+                Point3 SVector = sampledNormal.Cross(sampledNormal.Cross(-r.dir).GetNormalized()).GetNormalized();
+                
+                Point3 refractedDirection = (-(sampledNormal)*cosTheta2 + SVector*sinTheta2).GetNormalized();
+                
+                r = Ray(hInfo.p, refractedDirection);
+                
                 c = refraction.GetColor() / (refractionGray/sumGray);
             }
         }
         else {
             // Specular Bounce
             c = specular.GetColor() / (specularGray/sumGray);
-            return Trace(r, &rootNode, hInfo);
         }
     }
     else {
         // Diffuse Bounce
         c = diffuse.GetColor() / (diffuseGray/sumGray);
-        return Trace(r, &rootNode, hInfo);
     }
     
-    return true;
+    return Trace(r, &rootNode, hInfo);
 }
 
 Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const

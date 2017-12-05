@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <GL/glut.h>
+#include <GLUT/glut.h>
 
 #define WINDOW_SIZE 800
 
