@@ -16,6 +16,14 @@ extern LightList lights;
 int shadowSampleMax = 1;
 int shadowSampleMin = 1;
 
+Ray PointLight::RandomPhoton() const {
+    Point3 dir = SampleSphere(position, 1.0);
+    
+    Ray result = Ray(position, dir);
+    
+    return result;
+}
+
 float GenLight::Shadow(Ray ray, float t_max) {
     HitInfo h;
     h.z = t_max;

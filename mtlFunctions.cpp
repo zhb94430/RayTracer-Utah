@@ -16,6 +16,13 @@ extern Camera camera;
 extern Node rootNode;
 extern TexturedColor environment;
 
+bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, const HitInfo &hInfo) const
+{
+    
+    
+    return false;
+}
+
 Color MtlBlinn::Shade(const Ray &ray, const HitInfo &hInfo, const LightList &lights, int bounceCount) const
 {
     Color result = Color(0,0,0);

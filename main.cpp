@@ -5,6 +5,7 @@
 #include "ExternalLibrary/viewport.cpp"
 #include "ExternalLibrary/xmlload.cpp"
 #include "ExternalLibrary/lodepng.cpp"
+#include "ExternalLibrary/cyPhotonMap.h"
 #include "RenderFunctions.cpp"
 #include "PixelIterator.h"
 #include <thread>
@@ -24,8 +25,12 @@ ObjFileList objList;
 TexturedColor background;
 TexturedColor environment;
 TextureList textureList;
+cy::PhotonMap pMap;
 
 void SpawnRenderThreads() {
+    // Generate Photon Map before rendering
+    GeneratePhotonMap();
+    
     //Multi Thread Rendering
     PixelIterator i = PixelIterator();
     int CPUCoreNumber = std::thread::hardware_concurrency();

@@ -7,6 +7,7 @@
 //
 #include "ExternalLibrary/scene.h"
 #include "ExternalLibrary/objects.h"
+#include "ExternalLibrary/cyPhotonMap.h"
 #include "PixelIterator.h"
 #include "RenderFunctions.h"
 #include <array>
@@ -18,6 +19,7 @@ extern RenderImage renderImage;
 extern MaterialList materials;
 extern LightList lights;
 extern TexturedColor background;
+extern cy::PhotonMap pMap;
 
 float actualHeight, actualWidth;
 
@@ -28,6 +30,9 @@ const float targetVariance = 0.005;
 const int sampleIncrement = 1;
 const int monteCarloSampleSize = 1;
 const int monteCarloBounces = 4;
+const int photonMapSize = 1000000;
+const int photonMaxBounce = 10;
+const float photonEstRadius = 1.0;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -365,6 +370,51 @@ Point3 SampleHemiSphereCosine(Point3 origin, Point3 normal, float radius)
              v2 * (radius * sin(sampleTheta) * sin(samplePhi));
     
     return offset;
+}
+
+// PhotonMapping
+
+void GeneratePhotonMap()
+{
+    while (pMap.NumPhotons() < photonMapSize) {
+        // TODO: Randomly decide on light source
+        PointLight* currentLight = (PointLight*)lights[0];
+        Color photonIntensity = currentLight->GetPhotonIntensity();
+        
+        // Generate Photon
+        Ray photonRay = currentLight->RandomPhoton();
+        HitInfo photonH = HitInfo();
+        
+        // Trace the first hit
+        if (Trace(photonRay, &rootNode, photonH)) {
+            if (photonH.node->GetMaterial()->IsPhotonSurface()) {
+                // Record the first bounce
+                pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), photonIntensity);
+                
+                // Iteratively bounce the photon
+                for (int i = 0; i < photonMaxBounce; i++) {
+                    // Generate random bounce direction
+                    Point3 direction = SampleHemiSphere(photonH.p, photonH.N, 1.0);
+                    Ray nextPhotonRay = Ray(photonH.p, direction.GetNormalized());
+                    
+                    if (photonH.node->GetMaterial()->RandomPhotonBounce(nextPhotonRay, photonIntensity, photonH)) {
+                        pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), photonIntensity);
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    pMap.PrepareForIrradianceEstimation();
+}
+
+// Sample Photon Map after first path tracing
+void PhotonMapSampling()
+{
+    
 }
 
 //Monte Carlo Sampling
