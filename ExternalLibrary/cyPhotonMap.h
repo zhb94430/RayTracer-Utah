@@ -4,8 +4,8 @@
 ///
 /// \file		PhotonMap.h 
 /// \author		Cem Yuksel
-/// \version	0.2
-/// \date		November 20, 2017
+/// \version	0.3
+/// \date		December 3, 2017
 ///
 /// \brief photon map map class.
 ///
@@ -71,22 +71,27 @@ public:
 	virtual ~PhotonMap() {}
 
 	/// Removes all photons and deallocates the memory.
-	void Clear() { std::vector<Photon>().swap(photons); }
+	void Clear() { std::vector<Photon>().swap(photons); numStoredPhotons=0; }
 
-	/// Allocates enough memory for n photons.
-	/// Calling this method before adding photons avoids 
-	/// multiple memory allocations while adding photons.
-	void AllocatePhotons( unsigned int n ) { photons.reserve(n+1); }
+	/// Resizes the photon map by allocating enough memory for n photons.
+	void Resize( int n ) { photons.resize(n+1); numStoredPhotons=0; }
 
 	/// Adds a photon to the map with the given position, direction, and power.
 	/// Assumes that the direction is normalized.
-	void AddPhoton( const Point3f &pos, const Point3f &dir, const Color &power );
+	/// Returns false if the photon map is full and that the photon cannot be inserted.
+	bool AddPhoton( const Point3f &pos, const Point3f &dir, const Color &power );
 
 	/// Returns the number of photons stored in the map
-	unsigned int NumPhotons() const { return photons.size(); }
+	int NumPhotons() const { return numStoredPhotons; }
+
+	/// Returns the total size of the photon map.
+	int Size() const { return int(photons.size()) - 1; }
+
+	/// Returns the remaining space in the photon map.
+	int RemainingSpace() const { return photons.size() - numStoredPhotons - 1; }
 
 	/// Scales the photon powers using the given scale factor
-	void ScalePhotonPowers(float scale, int start=0, int end=-1) { if ( end<0 ) end=photons.size()-1; for ( int i=start+1; i<=end; i++ ) photons[i].ScalePower(scale); }
+	void ScalePhotonPowers(float scale, int start=0, int end=-1) { if ( end<0 ) end=numStoredPhotons; for ( int i=start+1; i<=end; i++ ) photons[i].ScalePower(scale); }
 
 	/// Builds a balanced kd-tree.
 	/// This method must be called after adding all photons and
@@ -111,11 +116,12 @@ public:
 
 protected:
 	std::vector<Photon> photons;
+	std::atomic<int> numStoredPhotons;
 	int halfStoredPhotons;
 
 private:
 	/// Balances the given kd-tree segment
-	void BalanceSegment( std::vector<Photon> &balancedMap, const Point3f &boxMin, const Point3f &boxMax, unsigned int index, unsigned int start, unsigned int end );
+	void BalanceSegment( std::vector<Photon> &balancedMap, const Point3f &boxMin, const Point3f &boxMax, int index, int start, int end );
 
 	/// Swaps the two photons
 	void SwapPhotons( unsigned int i, unsigned int j ) { Photon p=photons[i]; photons[i]=photons[j]; photons[j]=p; }
@@ -181,26 +187,32 @@ inline void PhotonMap::Photon::GetDirection(Point3f &dir) const
 
 //-------------------------------------------------------------------------------
 
-inline void PhotonMap::AddPhoton( const Point3f &pos, const Point3f &dir, const Color &power )
+inline bool PhotonMap::AddPhoton( const Point3f &pos, const Point3f &dir, const Color &power )
 {
-	if ( photons.size() == 0 ) photons.push_back(Photon());
+	if ( numStoredPhotons >= Size() ) return false;
+	int i = ++numStoredPhotons;
+	if ( i > Size() ) {
+		numStoredPhotons--;
+		return false;
+	}
 	Photon p;
 	p.position = pos;
 	p.SetDirection(dir);
 	p.SetPower(power);
-	photons.push_back(p);
+	photons[i] = p;
+	return true;
 }
 
 //-------------------------------------------------------------------------------
 
 inline void PhotonMap::PrepareForIrradianceEstimation()
 {
-	if ( photons.size() == 0 ) return;
+	if ( photons.size() == 0 || numStoredPhotons==0 ) return;
 
 	// compute bounding box
 	Point3f boxMin = photons[0].position;
 	Point3f boxMax = photons[0].position;
-	for ( unsigned int i=1; i<photons.size(); i++ ) {
+	for ( int i=1; i<=numStoredPhotons; i++ ) {
 		if ( boxMin.x > photons[i].position.x ) boxMin.x = photons[i].position.x;
 		if ( boxMax.x < photons[i].position.x ) boxMax.x = photons[i].position.x;
 		if ( boxMin.y > photons[i].position.y ) boxMin.y = photons[i].position.y;
@@ -210,19 +222,19 @@ inline void PhotonMap::PrepareForIrradianceEstimation()
 	}
 
 	// balance the map
-	std::vector<Photon> balancedMap( photons.size() );
-	BalanceSegment(balancedMap, boxMin, boxMax, 1, 1, photons.size()-1 );
+	std::vector<Photon> balancedMap( numStoredPhotons+1 );
+	BalanceSegment(balancedMap, boxMin, boxMax, 1, 1, numStoredPhotons );
 
 	balancedMap.swap( photons );
-	halfStoredPhotons = (photons.size()-1)/2 - 1;
+	halfStoredPhotons = numStoredPhotons/2 - 1;
 }
 
 //-------------------------------------------------------------------------------
 
-inline void PhotonMap::BalanceSegment( std::vector<Photon> &balancedMap, const Point3f &boxMin, const Point3f &boxMax, unsigned int index, unsigned int start, unsigned int end )
+inline void PhotonMap::BalanceSegment( std::vector<Photon> &balancedMap, const Point3f &boxMin, const Point3f &boxMax, int index, int start, int end )
 {
 	// find median
-	unsigned int median=1;
+	int median=1;
 	while ((4*median) <= (end-start+1)) median += median;
 	if ((3*median) <= (end-start+1)) {
 		median += median;
@@ -239,12 +251,12 @@ inline void PhotonMap::BalanceSegment( std::vector<Photon> &balancedMap, const P
 	} else if ( boxDif.y > boxDif.z ) axis = 1;
 
 	// partition photon block around the median
-	unsigned int left = start;
-	unsigned int right = end;
+	int left = start;
+	int right = end;
 	while ( right > left ) {
 		const float v = photons[right].position[axis];
-		unsigned int i = left - 1;
-		unsigned int j = right;
+		int i = left - 1;
+		int j = right;
 		while ( photons[++i].position[axis] < v );
 		while ( photons[--j].position[axis] > v && j>left );
 		while ( i < j ) {

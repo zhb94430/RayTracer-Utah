@@ -80,5 +80,5 @@ Color PointLight::Illuminate(const Point3 &p, const Point3 &N) const {
         result = shadowIntensity;
     }
     
-    return result * intensity;
+    return result * intensity * (1/(position - p).LengthSquared());
 }

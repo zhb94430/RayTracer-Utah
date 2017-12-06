@@ -19,18 +19,17 @@ extern RenderImage renderImage;
 extern MaterialList materials;
 extern LightList lights;
 extern TexturedColor background;
-extern cy::PhotonMap pMap;
 
 float actualHeight, actualWidth;
 
 //Render Parameters
 const int minSampleSize = 8;
-const int maxSampleSize = 1024;
+const int maxSampleSize = 64;
 const float targetVariance = 0.005;
 const int sampleIncrement = 1;
 const int monteCarloSampleSize = 1;
 const int monteCarloBounces = 4;
-const unsigned int photonMapSize = 1000000;
+const int photonMapSize = 100000;
 const int photonMaxBounce = 10;
 const float photonEstRadius = 1.0;
 const float photonEllipticity = 0.2;
@@ -38,9 +37,12 @@ const float photonEllipticity = 0.2;
 //Sampling Variables
 int HaltonIndex = 0;
 
+cy::PhotonMap pMap;
+
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
+Color MonteCarloPhoton(const HitInfo &hInfo, int x, int y, int numOfSamples);
 void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples);
 Color PathTrace(const HitInfo &hInfo, int x, int y, int bounces);
 
@@ -127,13 +129,16 @@ void Render(PixelIterator& i)
                     
                     if (hitResult[index]) {
                         // Copy and Construct a new light list for monte carlo
-                        LightList monteCarloList;
+//                        LightList monteCarloList;
 
                         // Monte Carlo
-                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
+//                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
 
-                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
-                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
+//                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
+//                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
+                        
+                        // Photon Map
+                        currentResult = MonteCarloPhoton(hitInfoArray[index], x, y, monteCarloSampleSize);
                     }
                     else {
                         currentResult = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
@@ -376,7 +381,13 @@ Point3 SampleHemiSphereCosine(Point3 origin, Point3 normal, float radius)
 
 void GeneratePhotonMap()
 {
-    pMap.AllocatePhotons(photonMapSize);
+    pMap.Clear();
+    pMap.Resize(photonMapSize);
+    
+    int test = pMap.Size();
+    int testP = pMap.NumPhotons();
+    
+    int photonFromLight = 0;
     
     while (pMap.NumPhotons() < photonMapSize) {
         // TODO: Randomly decide on light source
@@ -389,6 +400,8 @@ void GeneratePhotonMap()
         
         // Trace the first hit
         if (Trace(photonRay, &rootNode, photonH)) {
+            photonFromLight++;
+            
             if (photonH.node->GetMaterial()->IsPhotonSurface()) {
                 // Record the first bounce
                 pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), photonIntensity);
@@ -413,9 +426,52 @@ void GeneratePhotonMap()
         }
     }
     
+    pMap.ScalePhotonPowers(((PointLight*)lights[0])->GetPhotonIntensity().Gray() / photonFromLight);
+//    pMap.ScalePhotonPowers(0.00001);
+    
+    test = pMap.Size();
+    testP = pMap.NumPhotons();
+    
     printf("Photon Map Generated\n");
     
     pMap.PrepareForIrradianceEstimation();
+}
+
+//Monte Carlo + Photon Mapping
+Color MonteCarloPhoton(const HitInfo &hInfo, int x, int y, int numOfSamples)
+{
+    Color c = Color(0.0, 0.0, 0.0);
+    
+    // First Bounce
+    for (int index = 0; index < numOfSamples; index++) {
+        HitInfo h = HitInfo();
+        
+        // Create sample ray
+        //            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
+        Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
+        Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
+        
+        // Trace & Shade
+        if (Trace(sampleRay, &rootNode, h)) {
+            // Direct Light
+            c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
+            
+            // Sample Photonmap
+            Color irradianceEst = Color(0.0, 0.0 ,0.0);
+            Point3 irradianceDirection = Point3(0.0,0.0,0.0);
+            
+            pMap.EstimateIrradiance<photonMapSize>(irradianceEst, irradianceDirection, photonEstRadius, h.p, &h.N, photonEllipticity);
+            
+            c += irradianceEst;
+        }
+        else {
+            c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+        }
+    }
+    
+    c /= (float)monteCarloSampleSize;
+    
+    return c;
 }
 
 //Monte Carlo Sampling
@@ -448,7 +504,7 @@ void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int b
                     Point3 irradianceDirection = Point3(0.0,0.0,0.0);
                     
                     //Estimate with photon map
-                    pMap.EstimateIrradiance<photonMapSize>(irradianceEst, irradianceDirection, photonEstRadius, hInfo.p, &hInfo.N, photonEllipticity);
+                    pMap.EstimateIrradiance<photonMapSize>(irradianceEst, irradianceDirection, photonEstRadius, h.p, &h.N, photonEllipticity);
                     
                     c += irradianceEst;
                 }

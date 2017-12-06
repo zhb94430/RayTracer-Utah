@@ -25,7 +25,6 @@ ObjFileList objList;
 TexturedColor background;
 TexturedColor environment;
 TextureList textureList;
-cy::PhotonMap pMap = cy::PhotonMap();
 
 void SpawnRenderThreads() {
     // Generate Photon Map before rendering
@@ -36,7 +35,7 @@ void SpawnRenderThreads() {
     int CPUCoreNumber = std::thread::hardware_concurrency();
 
     if (CPUCoreNumber == 0) {
-        CPUCoreNumber = 1;
+//        CPUCoreNumber = 1;
     }
 
 //    #if DEBUG

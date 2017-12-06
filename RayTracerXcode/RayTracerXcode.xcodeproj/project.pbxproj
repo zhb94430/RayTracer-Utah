@@ -347,7 +347,10 @@
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "USE_GLUT=1";
 				GCC_VERSION = "";
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = "-lc++";
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-Wl,-stack_size,10000000",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -360,7 +363,10 @@
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "USE_GLUT=1";
 				GCC_VERSION = "";
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = "-lc++";
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-Wl,-stack_size,10000000",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
