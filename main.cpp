@@ -25,41 +25,41 @@ ObjFileList objList;
 TexturedColor background;
 TexturedColor environment;
 TextureList textureList;
-cy::PhotonMap pMap;
+cy::PhotonMap pMap = cy::PhotonMap();
 
 void SpawnRenderThreads() {
     // Generate Photon Map before rendering
     GeneratePhotonMap();
     
     //Multi Thread Rendering
-//    PixelIterator i = PixelIterator();
-//    int CPUCoreNumber = std::thread::hardware_concurrency();
-//
-//    if (CPUCoreNumber == 0) {
-//        CPUCoreNumber = 1;
-//    }
-//
-////    #if DEBUG
-////    DEBUG PURPOSE
-////        CPUCoreNumber = 1;
-////    #endif
-//
-//    for (int j = 0; j < CPUCoreNumber; j++) {
-//        std::thread(Render, std::ref(i)).detach();
-//    }
-//
-//    while (!i.IterationComplete()) {
-//
-//    }
+    PixelIterator i = PixelIterator();
+    int CPUCoreNumber = std::thread::hardware_concurrency();
+
+    if (CPUCoreNumber == 0) {
+        CPUCoreNumber = 1;
+    }
+
+//    #if DEBUG
+//    DEBUG PURPOSE
+        CPUCoreNumber = 1;
+//    #endif
+
+    for (int j = 0; j < CPUCoreNumber; j++) {
+        std::thread(Render, std::ref(i)).detach();
+    }
+
+    while (!i.IterationComplete()) {
+
+    }
     
     //Output Image
     FILE *fp=fopen("photonmap.dat","wb");
     fwrite(pMap.GetPhotons(),sizeof(cyPhotonMap::Photon),pMap.NumPhotons(),fp);
     fclose(fp);
     
-//    renderImage.SaveImage("Result.png");
-//    renderImage.ComputeZBufferImage();
-//    renderImage.SaveZImage("ZBuffer.png");
+    renderImage.SaveImage("Result.png");
+    renderImage.ComputeZBufferImage();
+    renderImage.SaveZImage("ZBuffer.png");
 //    renderImage.ComputeSampleCountImage();
 //    renderImage.SaveSampleCountImage("SampleCount.png");
 }
@@ -82,7 +82,7 @@ int main(int argc, const char* argv[])
     }
     //Load default scene if no sceneFile provided
     else {
-        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project11/scene_glossy_soft.xml");
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project13/scene.xml");
     }
     
     ShowViewport();

@@ -33,7 +33,7 @@ const int monteCarloBounces = 4;
 const unsigned int photonMapSize = 1000000;
 const int photonMaxBounce = 10;
 const float photonEstRadius = 1.0;
-const float photonellipticity = 0.2;
+const float photonEllipticity = 0.2;
 
 //Sampling Variables
 int HaltonIndex = 0;
@@ -376,6 +376,8 @@ Point3 SampleHemiSphereCosine(Point3 origin, Point3 normal, float radius)
 
 void GeneratePhotonMap()
 {
+    pMap.AllocatePhotons(photonMapSize);
+    
     while (pMap.NumPhotons() < photonMapSize) {
         // TODO: Randomly decide on light source
         PointLight* currentLight = (PointLight*)lights[0];
@@ -402,7 +404,7 @@ void GeneratePhotonMap()
                 currentIncomingIntensity = currentOutgoingIntensity;
 
                 if (photonH.node->GetMaterial()->RandomPhotonBounce(nextPhotonRay, currentOutgoingIntensity, photonH)) {
-                    pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), currentIncomingIntensity);
+                    pMap.AddPhoton(photonH.p, -photonRay.dir.GetNormalized(), currentIncomingIntensity);
                 }
                 else {
                     break;
@@ -436,17 +438,20 @@ void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int b
             
             // Trace & Shade
             if (Trace(sampleRay, &rootNode, h)) {
-                const Material* currentMaterial = h.node->GetMaterial();
-                
-                //Stop when hit a light
-                const char* sresult = currentMaterial->GetName();
-                const char* compare = "light";
-                if (strcmp(sresult, compare )!=0) {
+                if (bounces == monteCarloBounces) {
                     MonteCarlo(currentSampleList, h, x, y, bounces-1, 1);
                     c += h.node->GetMaterial()->Shade(sampleRay, h, currentSampleList, 5);
+                    c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
                 }
-                
-                c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
+                else {
+                    Color irradianceEst = Color(0.0, 0.0 ,0.0);
+                    Point3 irradianceDirection = Point3(0.0,0.0,0.0);
+                    
+                    //Estimate with photon map
+                    pMap.EstimateIrradiance<photonMapSize>(irradianceEst, irradianceDirection, photonEstRadius, hInfo.p, &hInfo.N, photonEllipticity);
+                    
+                    c += irradianceEst;
+                }
             }
             else {
                 c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
