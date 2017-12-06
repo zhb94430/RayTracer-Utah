@@ -83,7 +83,7 @@ public:
 	void AddPhoton( const Point3f &pos, const Point3f &dir, const Color &power );
 
 	/// Returns the number of photons stored in the map
-	unsigned int NumPhotons() const { return photons.size()-1; }
+	unsigned int NumPhotons() const { return photons.size(); }
 
 	/// Scales the photon powers using the given scale factor
 	void ScalePhotonPowers(float scale, int start=0, int end=-1) { if ( end<0 ) end=photons.size()-1; for ( int i=start+1; i<=end; i++ ) photons[i].ScalePower(scale); }

@@ -32,29 +32,34 @@ void SpawnRenderThreads() {
     GeneratePhotonMap();
     
     //Multi Thread Rendering
-    PixelIterator i = PixelIterator();
-    int CPUCoreNumber = std::thread::hardware_concurrency();
-    
-    if (CPUCoreNumber == 0) {
-        CPUCoreNumber = 1;
-    }
-    
-//    #if DEBUG
-//    DEBUG PURPOSE
+//    PixelIterator i = PixelIterator();
+//    int CPUCoreNumber = std::thread::hardware_concurrency();
+//
+//    if (CPUCoreNumber == 0) {
 //        CPUCoreNumber = 1;
-//    #endif
+//    }
+//
+////    #if DEBUG
+////    DEBUG PURPOSE
+////        CPUCoreNumber = 1;
+////    #endif
+//
+//    for (int j = 0; j < CPUCoreNumber; j++) {
+//        std::thread(Render, std::ref(i)).detach();
+//    }
+//
+//    while (!i.IterationComplete()) {
+//
+//    }
     
-    for (int j = 0; j < CPUCoreNumber; j++) {
-        std::thread(Render, std::ref(i)).detach();
-    }
-    
-    while (!i.IterationComplete()) {
-        
-    }
     //Output Image
-    renderImage.SaveImage("Result.png");
-    renderImage.ComputeZBufferImage();
-    renderImage.SaveZImage("ZBuffer.png");
+    FILE *fp=fopen("photonmap.dat","wb");
+    fwrite(pMap.GetPhotons(),sizeof(cyPhotonMap::Photon),pMap.NumPhotons(),fp);
+    fclose(fp);
+    
+//    renderImage.SaveImage("Result.png");
+//    renderImage.ComputeZBufferImage();
+//    renderImage.SaveZImage("ZBuffer.png");
 //    renderImage.ComputeSampleCountImage();
 //    renderImage.SaveSampleCountImage("SampleCount.png");
 }

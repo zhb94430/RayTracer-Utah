@@ -90,18 +90,20 @@ bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const
                 
                 r = Ray(hInfo.p, refractedDirection);
                 
-                c = refraction.GetColor() / (refractionGray/sumGray);
+                c *= refraction.GetColor() / (refractionGray/sumGray);
             }
         }
         else {
             // Specular Bounce
-            c = specular.GetColor() / (specularGray/sumGray);
+            c *= specular.GetColor() / (specularGray/sumGray);
         }
     }
     else {
         // Diffuse Bounce
-        c = diffuse.GetColor() / (diffuseGray/sumGray);
+        c *= diffuse.GetColor() / (diffuseGray/sumGray);
     }
+    
+    
     
     return Trace(r, &rootNode, hInfo);
 }
