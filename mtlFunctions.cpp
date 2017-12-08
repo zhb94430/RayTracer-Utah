@@ -18,17 +18,19 @@ extern TexturedColor environment;
 
 bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const
 {
-    float diffuseGray = diffuse.GetColor().Gray();
-    float specularGray = specular.GetColor().Gray();
-    float refractionGray = refraction.GetColor().Gray();
+    float diffuseGray = diffuse.Sample(hInfo.uvw).Gray();
+    float specularGray = specular.Sample(hInfo.uvw).Gray();
+    float refractionGray = refraction.Sample(hInfo.uvw).Gray();
     
     // Sum up material intensities
     float sumGray = diffuseGray + specularGray + refractionGray;
     
-    // Add absorption
-    if (sumGray < 1.0) {
-        sumGray = 1.0;
-    }
+    //Normalize
+    diffuseGray = diffuseGray/sumGray;
+    specularGray = specularGray/sumGray;
+    refractionGray = refractionGray/sumGray;
+    
+    sumGray = 1.0;
     
     // Calculate Probability
     float graySample = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/sumGray));
@@ -90,20 +92,24 @@ bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const
                 
                 r = Ray(hInfo.p, refractedDirection);
                 
-                c *= refraction.GetColor() / (refractionGray/sumGray);
+                c *= refraction.Sample(hInfo.uvw) / (refractionGray/sumGray);
             }
         }
         else {
             // Specular Bounce
-            c *= specular.GetColor() / (specularGray/sumGray);
+            Point3 direction = SampleSphere(hInfo.p, 1.0);
+            r = Ray(hInfo.p, direction);
+            
+            c *= specular.Sample(hInfo.uvw) / (specularGray/sumGray);
         }
     }
     else {
         // Diffuse Bounce
-        c *= diffuse.GetColor() / (diffuseGray/sumGray);
+        Point3 direction = SampleSphere(hInfo.p, 1.0);
+        r = Ray(hInfo.p, direction);
+        
+        c *= diffuse.Sample(hInfo.uvw) / (diffuseGray/sumGray);
     }
-    
-    
     
     return Trace(r, &rootNode, hInfo);
 }

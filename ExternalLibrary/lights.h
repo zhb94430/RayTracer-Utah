@@ -58,6 +58,23 @@ private:
 
 //-------------------------------------------------------------------------------
 
+class PhotonLight : public GenLight
+{
+public:
+    PhotonLight() : intensity(0,0,0), direction(0,0,1) {}
+    virtual Color Illuminate(const Point3 &p, const Point3 &N) const { return intensity; }
+    virtual Point3 Direction(const Point3 &p) const { return direction; }
+    virtual void SetViewportLight(int lightID) const { SetViewportParam(lightID,ColorA(0.0f),ColorA(intensity),Point4(-direction,0.0f)); }
+    
+    void SetIntensity(Color intens) { intensity=intens; }
+    void SetDirection(Point3 dir) { direction=dir.GetNormalized(); }
+private:
+    Color intensity;
+    Point3 direction;
+};
+
+//-------------------------------------------------------------------------------
+
 class PointLight : public GenLight
 {
 public:

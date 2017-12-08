@@ -35,12 +35,12 @@ void SpawnRenderThreads() {
     int CPUCoreNumber = std::thread::hardware_concurrency();
 
     if (CPUCoreNumber == 0) {
-//        CPUCoreNumber = 1;
+        CPUCoreNumber = 1;
     }
 
 //    #if DEBUG
 //    DEBUG PURPOSE
-        CPUCoreNumber = 1;
+//        CPUCoreNumber = 1;
 //    #endif
 
     for (int j = 0; j < CPUCoreNumber; j++) {

@@ -29,19 +29,23 @@ const float targetVariance = 0.005;
 const int sampleIncrement = 1;
 const int monteCarloSampleSize = 1;
 const int monteCarloBounces = 4;
-const int photonMapSize = 100000;
+const int photonMapSize = 1000000;
+const int photonSampleSize = 100;
 const int photonMaxBounce = 10;
-const float photonEstRadius = 1.0;
-const float photonEllipticity = 0.2;
+const float photonEstRadius = 1;
+const float photonEllipticity = 0.5;
 
 //Sampling Variables
 int HaltonIndex = 0;
 
-cy::PhotonMap pMap;
+cyPhotonMap pMap;
 
 //Prototypes
 Point3 CalculateImageOrigin(float distanceToImg);
 Point3 CalculateCurrentPoint(int i, int j, float pixelOffsetX, float pixelOffsetY, Point3 origin);
+Ray CalculateReflectedRay(const Ray incomingRay, const HitInfo &hInfo, const float reflectionGlossiness);
+Ray CalculateRefractedRay(const Ray incomingRay, const HitInfo &hInfo, const float refractionGlossiness, const float ior);
+Color PhotonMapping(const Ray &r, const HitInfo &hInfo);
 Color MonteCarloPhoton(const HitInfo &hInfo, int x, int y, int numOfSamples);
 void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples);
 Color PathTrace(const HitInfo &hInfo, int x, int y, int bounces);
@@ -55,23 +59,21 @@ void Render(PixelIterator& i)
     srand(time(NULL));
     
     while (i.GetPixelLocation(x, y)) {
-        
-        
-        if (x == 403 && y == 323) {
-            int j = 0;
-        }
+//        if (x == 403 && y == 323) {
+//            int j = 0;
+//        }
         
         //Sample Array
         std::array<Ray, maxSampleSize> rayArray;
         std::array<HitInfo, maxSampleSize> hitInfoArray;
         std::array<bool, maxSampleSize> hitResult;
-        float pixelIncrement = 1.0/minSampleSize;
+        float pixelIncrement = 1.0/maxSampleSize;
         bool hitResultSum = false;
         float zSum = 0.0;
         int numOfHits = 0;
         
         //Populate the two hitinfo array
-        for (int index = 0; index < minSampleSize; index++) {
+        for (int index = 0; index < maxSampleSize; index++) {
             imgOrigin = CalculateImageOrigin(camera.focaldist);
             
             //Generate offset for current sample
@@ -116,86 +118,43 @@ void Render(PixelIterator& i)
             
             Color pixelValuesSum = Color(0.0, 0.0, 0.0);
             std::array<Color, maxSampleSize> pixelValueArray;
-
-            int currentStartIndex = 0;
-            int currentSampleCount = minSampleSize;
-            float currentVariance = 100.0;
             
-            // Adaptive Sampling
-            while (currentSampleCount < maxSampleSize /*&& currentVariance > targetVariance*/) {
-                // Shading Calculation
-                for (int index = currentStartIndex; index < currentSampleCount; index++) {
-                    Color currentResult = Color(0.0, 0.0, 0.0);
-                    
-                    if (hitResult[index]) {
-                        // Copy and Construct a new light list for monte carlo
+            // Shading Calculation
+            for (int index = 0; index < maxSampleSize; index++) {
+                Color currentResult = Color(0.0, 0.0, 0.0);
+                
+                if (hitResult[index]) {
+                    // Copy and Construct a new light list for monte carlo
 //                        LightList monteCarloList;
 
-                        // Monte Carlo
+                    // Monte Carlo
 //                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
 
 //                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
 //                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
-                        
-                        // Photon Map
-                        currentResult = MonteCarloPhoton(hitInfoArray[index], x, y, monteCarloSampleSize);
-                    }
-                    else {
-                        currentResult = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
-                    }
                     
-                    pixelValuesSum += currentResult;
-                    pixelValueArray[index] = currentResult;
-                }
-                
-                //Variance Calculation
-                float currentMean = pixelValuesSum.Gray() / (float) currentSampleCount;
-                
-                float sum = 0.0;
-                for (int index = 0; index < currentSampleCount; index++) {
-                    sum += pow((pixelValueArray[index].Gray() - currentMean), 2);
-                }
-                
-                currentVariance = sum / currentSampleCount;
-                
-                //Generate more samples
-                if (currentVariance > targetVariance) {
-                    currentStartIndex = currentSampleCount;
-                    currentSampleCount += sampleIncrement;
+                    // Photon Map + MonteCarlo
+                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
+                        currentResult += MonteCarloPhoton(hitInfoArray[index], x, y, monteCarloSampleSize);
                     
-                    for (int index = currentStartIndex; index < currentSampleCount; index++) {
-                        //Generate sample
-                        float offsetX = Halton(index, 4);
-                        float offsetY = Halton(index, 5);
-                        
-                        //Generate lens sample
-                        float sampleR = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/camera.dof));
-                        float sampleTheta = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2 * M_PI)));
-                        float camOffsetX = sampleR * cos(sampleTheta);
-                        float camOffsetY = sampleR * sin(sampleTheta);
-                        
-                        Point3 sampledPosition = camera.pos + camera.up * camOffsetY + camera.dir.GetNormalized().Cross(camera.up.GetNormalized()).GetNormalized() * camOffsetX;
-                        
-                        Point3 currentPoint = CalculateCurrentPoint(x, y, offsetX, offsetY, imgOrigin);
-                        rayArray[index] = Ray(sampledPosition, (currentPoint - sampledPosition).GetNormalized());
-                        
-                        //Everything is stored in World Coordinate
-                        hitInfoArray[index] = HitInfo();
-                        
-                        //Trace ray with each object
-                        hitResult[index] = Trace(rayArray[index], &rootNode, hitInfoArray[index]);
-                    }
+                    // Photon Map
+//                    currentResult = PhotonMapping(rayArray[index], hitInfoArray[index]);
                 }
+                else {
+                    currentResult = background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+                }
+                
+                pixelValuesSum += currentResult;
+                pixelValueArray[index] = currentResult;
             }
             
-            pixelValuesSum /= (float)currentSampleCount;
+            pixelValuesSum /= (float)maxSampleSize;
             
             // Gamma Correction
             pixelValuesSum.r = pow(pixelValuesSum.r, 1/2.2);
             pixelValuesSum.g = pow(pixelValuesSum.g, 1/2.2);
             pixelValuesSum.b = pow(pixelValuesSum.b, 1/2.2);
             
-            renderImage.GetSampleCount()[imgArrayIndex] = currentSampleCount;
             renderImage.GetPixels()[imgArrayIndex] = Color24(pixelValuesSum);
             renderImage.IncrementNumRenderPixel(1);
         }
@@ -207,7 +166,6 @@ void Render(PixelIterator& i)
             result.g = pow(result.g, 1/2.2);
             result.b = pow(result.b, 1/2.2);
             
-            renderImage.GetSampleCount()[imgArrayIndex] = minSampleSize;
             renderImage.GetPixels()[imgArrayIndex] = Color24(result);
             renderImage.IncrementNumRenderPixel(1);
         }
@@ -381,18 +339,14 @@ Point3 SampleHemiSphereCosine(Point3 origin, Point3 normal, float radius)
 
 void GeneratePhotonMap()
 {
-    pMap.Clear();
     pMap.Resize(photonMapSize);
-    
-    int test = pMap.Size();
-    int testP = pMap.NumPhotons();
     
     int photonFromLight = 0;
     
     while (pMap.NumPhotons() < photonMapSize) {
         // TODO: Randomly decide on light source
         PointLight* currentLight = (PointLight*)lights[0];
-        Color photonIntensity = currentLight->GetPhotonIntensity()/(4*M_PI);
+        Color photonIntensity = currentLight->GetPhotonIntensity();
         
         // Generate Photon
         Ray photonRay = currentLight->RandomPhoton();
@@ -404,20 +358,20 @@ void GeneratePhotonMap()
             
             if (photonH.node->GetMaterial()->IsPhotonSurface()) {
                 // Record the first bounce
-                pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), photonIntensity);
+//                pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), photonIntensity);
             }
             
             Color currentIncomingIntensity = photonIntensity;
             Color currentOutgoingIntensity = photonIntensity;
             // Iteratively bounce the photon
             for (int i = 0; i < photonMaxBounce; i++) {
-                // Generate random bounce direction
-                Point3 direction = SampleSphere(photonH.p, 1.0);
-                Ray nextPhotonRay = Ray(photonH.p, direction.GetNormalized());
-                currentIncomingIntensity = currentOutgoingIntensity;
+                
+                currentIncomingIntensity = Color(currentOutgoingIntensity);
 
-                if (photonH.node->GetMaterial()->RandomPhotonBounce(nextPhotonRay, currentOutgoingIntensity, photonH)) {
-                    pMap.AddPhoton(photonH.p, -photonRay.dir.GetNormalized(), currentIncomingIntensity);
+                if (photonH.node->GetMaterial()->RandomPhotonBounce(photonRay, currentOutgoingIntensity, photonH)) {
+                    if (photonH.node->GetMaterial()->IsPhotonSurface()) {
+                        pMap.AddPhoton(photonH.p, photonRay.dir.GetNormalized(), currentIncomingIntensity);
+                    }
                 }
                 else {
                     break;
@@ -426,15 +380,35 @@ void GeneratePhotonMap()
         }
     }
     
-    pMap.ScalePhotonPowers(((PointLight*)lights[0])->GetPhotonIntensity().Gray() / photonFromLight);
+    float scaleFactor = (((PointLight*)lights[0])->GetPhotonIntensity() / photonFromLight).Gray();
+    
+    printf("Photon From Light: %i \n", photonFromLight);
+    printf("Photon Scale Factor: %f \n", scaleFactor);
+    
+    pMap.ScalePhotonPowers(scaleFactor);
 //    pMap.ScalePhotonPowers(0.00001);
-    
-    test = pMap.Size();
-    testP = pMap.NumPhotons();
-    
     printf("Photon Map Generated\n");
     
     pMap.PrepareForIrradianceEstimation();
+}
+
+// Photon Mapping
+Color PhotonMapping(const Ray &r, const HitInfo &hInfo)
+{
+    Color irradianceEst = Color(0.0, 0.0 ,0.0);
+    Point3 irradianceDirection = Point3(0.0,0.0,0.0);
+    LightList dummyLL;
+
+    pMap.EstimateIrradiance<photonSampleSize>(irradianceEst, irradianceDirection, photonEstRadius, hInfo.p, &hInfo.N, photonEllipticity);
+    
+    PhotonLight* d = new PhotonLight();
+    
+    d->SetIntensity(irradianceEst);
+    d->SetDirection(irradianceDirection);
+
+    dummyLL.push_back(d);
+    
+    return hInfo.node->GetMaterial()->Shade(r, hInfo, dummyLL, 0);
 }
 
 //Monte Carlo + Photon Mapping
@@ -446,27 +420,28 @@ Color MonteCarloPhoton(const HitInfo &hInfo, int x, int y, int numOfSamples)
     for (int index = 0; index < numOfSamples; index++) {
         HitInfo h = HitInfo();
         
-        // Create sample ray
-        //            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
-        Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
-        Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
+        int actualBounces = 0;
         
-        // Trace & Shade
-        if (Trace(sampleRay, &rootNode, h)) {
-            // Direct Light
-            c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
+        for (int b = 0; index < (monteCarloBounces-1); b++) {
+            // Create sample ray
+            //            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
+            Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
+            Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
             
-            // Sample Photonmap
-            Color irradianceEst = Color(0.0, 0.0 ,0.0);
-            Point3 irradianceDirection = Point3(0.0,0.0,0.0);
+            actualBounces++;
             
-            pMap.EstimateIrradiance<photonMapSize>(irradianceEst, irradianceDirection, photonEstRadius, h.p, &h.N, photonEllipticity);
-            
-            c += irradianceEst;
+            // Trace & Shade
+            if (Trace(sampleRay, &rootNode, h)) {
+                // Sample Photonmap
+                c += PhotonMapping(sampleRay, h);
+            }
+            else {
+                c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+                break;
+            }
         }
-        else {
-            c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
-        }
+        
+        c /= (float)actualBounces;
     }
     
     c /= (float)monteCarloSampleSize;
@@ -525,3 +500,69 @@ void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int b
     
     copiedList.push_back(a);
 }
+
+Ray CalculateReflectedRay(const Ray incomingRay, const HitInfo &hInfo, const float reflectionGlossiness) {
+    // Glossiness Sampling
+    Point3 sampleOrigin = hInfo.p+hInfo.N;
+    Point3 sampledOffset = SampleSphere(sampleOrigin, reflectionGlossiness);
+    Point3 sampledNormal = (sampleOrigin + sampledOffset - hInfo.p).GetNormalized();
+    
+    //Calculate the reflected ray direction
+    Point3 reflectedDirection = (incomingRay.dir - 2*incomingRay.dir.Dot(sampledNormal)*sampledNormal).GetNormalized();
+    
+    Ray result = Ray(hInfo.p, reflectedDirection);
+
+    return result;
+}
+
+Ray CalculateRefractedRay(const Ray incomingRay, const HitInfo &hInfo, const float refractionGlossiness, const float ior) {
+    //Calculate the reflected ray direction
+    Point3 sampleOrigin = hInfo.p-hInfo.N;
+    Point3 sampledOffset = SampleSphere(sampleOrigin, refractionGlossiness);
+    Point3 sampledNormal = (sampleOrigin + sampledOffset - hInfo.p).GetNormalized();
+    
+    //Calcluate the refracted ray direction
+    float cosTheta1 = sampledNormal.Dot(-incomingRay.dir);
+    float sinTheta1 = sqrt(1-pow(cosTheta1,2));
+    
+    //Account for floating point precision
+    if (sinTheta1 > 1) {
+        sinTheta1 = 1.0;
+    }
+    
+    if (sinTheta1 < -1) {
+        sinTheta1 = -1.0;
+    }
+    
+    if (cosTheta1 > 1) {
+        cosTheta1 = 1.0;
+    }
+    
+    if (cosTheta1 < -1) {
+        cosTheta1 = -1.0;
+    }
+    
+    //If front face hit, n2 = object ior, else n1 = object ior
+    float n1 = ior;
+    float n2 = 1.0;
+    if (hInfo.front) {
+        n1 = 1.0;
+        n2 = ior;
+    }
+    
+    float sinTheta2 = (n1/n2) * sinTheta1;
+    float cosTheta2 = sqrt(1 - sinTheta2 * sinTheta2);
+    
+    if (cosTheta2 > 1) {
+        cosTheta2 = 1.0;
+    }
+    
+    Point3 SVector = sampledNormal.Cross(sampledNormal.Cross(-incomingRay.dir).GetNormalized()).GetNormalized();
+    
+    Point3 refractedDirection = (-(sampledNormal)*cosTheta2 + SVector*sinTheta2).GetNormalized();
+    
+    Ray result = Ray(hInfo.p, refractedDirection);
+    
+    return result;
+}
+
