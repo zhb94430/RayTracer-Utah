@@ -19,7 +19,7 @@ int shadowSampleMin = 1;
 Ray PointLight::RandomPhoton() const {
     Point3 dir = SampleSphere(position, 1.0);
     
-    Ray result = Ray(position, dir);
+    Ray result = Ray(position, dir.GetNormalized());
     
     return result;
 }

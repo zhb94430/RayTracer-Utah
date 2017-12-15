@@ -1,0 +1,112 @@
+<xml>
+	<scene>
+		<background r="1" g="1" b="1" texture="/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Teapot/ink2.png">
+		</background>
+		<environment value="0.3" texture="/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Teapot/ink2.png"/>
+		<!-- Objects -->
+		<!-- <object name="box">
+			<translate x="0" y="0" z="12"/>
+			<object type="plane" name="WallBottom" material="wall">
+				<scale value="32"/>
+				<translate z="-12"/>
+			</object>
+			<object type="plane" name="WallTop" material="wall">
+				<scale value="32"/>
+				<rotate angle="180" x="1"/>
+				<translate z="12"/>
+			</object>
+			<object type="plane" name="WallBack" material="wall">
+				<scale value="32"/>
+				<rotate angle="90" x="1"/>
+				<translate y="20"/>
+			</object>
+			<object type="plane" name="WallLeft" material="wallRed">
+				<scale value="32"/>
+				<rotate angle="90" y="1"/>
+				<translate x="-15"/>
+			</object>
+			<object type="plane" name="WallRight" material="wallBlue">
+				<scale value="32"/>
+				<rotate angle="-90" y="1"/>
+				<translate x="15"/>
+			</object>
+		</object> -->
+		<object type="obj" name="/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project7/teapot.obj" material="mtl1">
+			<scale value="0.4"/>
+			<rotate angle="-30" z="1"/>
+			<translate x="2.5" y="-8" z="0"/>
+		</object>
+
+		<object type="plane" name="WallBottom" material="ground">
+			<scale value="10"/>
+			<rotate angle="-45" z="1"/>
+			<translate x="1" y="-14" z="0"/>
+		</object>
+		<object type="sphere" name="sphere1" material="mtl3">
+			<scale value="2"/>
+			<translate x="-4" y="-12" z="2"/>
+		</object>
+		<!-- <object type="sphere" name="sphere2" material="mtl3">
+			<scale value="4"/>
+			<translate x="-8" y="-6" z="4"/>
+		</object> -->
+
+		<!-- Materials -->
+		<material type="blinn" name="wall">
+			<diffuse  r="1" g="1" b="1"/>
+			<specular value="0"/>
+		</material>
+		<material type="blinn" name="ground">
+			<diffuse  r="0.8157" g="0.7804" b="0.6627"/>
+			<specular value="0"/>
+		</material>
+		<material type="blinn" name="wallRed">
+			<diffuse  r="1.0" g="0.5" b="0.5"/>
+			<specular value="0"/>
+		</material>
+		<material type="blinn" name="wallBlue">
+			<diffuse  r="0.5" g="0.5" b="1.0"/>
+			<specular value="0"/>
+		</material>
+		<material type="blinn" name="mtl1">
+			<diffuse  r="0.6784" g="0.8549" b="0.1098"/>
+			<specular r="1.0" g="1.0" b="1.0" value="0.9"/>
+			<glossiness value="30"/>
+		</material>
+		<material type="blinn" name="mtl2">
+			<diffuse  value="0"/>
+			<specular value="1.0"/>
+			<glossiness value="80"/>
+			<reflection value="1.0"/>
+		</material>
+		<material type="blinn" name="mtl3">
+			<diffuse  value="0"/>
+			<specular value="1.0"/>
+			<glossiness value="80"/>
+			<refraction value="1.0" index="1.52"/>
+		</material>
+
+		<!-- Lights -->
+		<light type="point" name="flashLeft">
+			<intensity value="200"/>
+			<position x="-8" y="2" z="30"/>
+		</light>
+		<light type="direct" name="directLight">
+			<intensity value="1.5" />
+			<direction x="-0.5" y="-0.5" z="-0.75" />
+		</light>
+		<!-- <light type="direct" name="directLight">
+			<intensity value="0.1" />
+			<direction x="0.5" y="0.5" z="0" />
+		</light> -->
+	</scene>
+
+	<camera>
+		<position x="0" y="-40" z="15"/>
+		<target x="0" y="0" z="12"/>
+		<up x="0" y="0" z="1"/>
+		<fov value="60"/>
+		<width value="2560"/>
+		<height value="1440"/>
+	</camera>
+</xml>

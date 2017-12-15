@@ -93,6 +93,7 @@ bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const
                 r = Ray(hInfo.p, refractedDirection);
                 
                 c *= refraction.Sample(hInfo.uvw) / (refractionGray/sumGray);
+//                c *= refraction.Sample(hInfo.uvw);
             }
         }
         else {
@@ -101,6 +102,7 @@ bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const
             r = Ray(hInfo.p, direction);
             
             c *= specular.Sample(hInfo.uvw) / (specularGray/sumGray);
+//            c *= specular.Sample(hInfo.uvw);
         }
     }
     else {
@@ -109,6 +111,7 @@ bool MtlBlinn::RandomPhotonBounce(Ray &r, Color &c, HitInfo &hInfo) const
         r = Ray(hInfo.p, direction);
         
         c *= diffuse.Sample(hInfo.uvw) / (diffuseGray/sumGray);
+//        c *= diffuse.Sample(hInfo.uvw);
     }
     
     return Trace(r, &rootNode, hInfo);

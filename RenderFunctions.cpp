@@ -24,7 +24,7 @@ float actualHeight, actualWidth;
 
 //Render Parameters
 const int minSampleSize = 8;
-const int maxSampleSize = 64;
+const int maxSampleSize = 1024;
 const float targetVariance = 0.005;
 const int sampleIncrement = 1;
 const int monteCarloSampleSize = 1;
@@ -47,6 +47,7 @@ Ray CalculateReflectedRay(const Ray incomingRay, const HitInfo &hInfo, const flo
 Ray CalculateRefractedRay(const Ray incomingRay, const HitInfo &hInfo, const float refractionGlossiness, const float ior);
 Color PhotonMapping(const Ray &r, const HitInfo &hInfo);
 Color MonteCarloPhoton(const HitInfo &hInfo, int x, int y, int numOfSamples);
+//void MonteCarlo(LightList &copiedList, const Ray &r, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples);
 void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples);
 Color PathTrace(const HitInfo &hInfo, int x, int y, int bounces);
 
@@ -111,7 +112,7 @@ void Render(PixelIterator& i)
         }
 
         int imgArrayIndex = x+renderImage.GetWidth()*y;
-        renderImage.GetZBuffer()[imgArrayIndex] = zSum / (float)numOfHits;
+//        renderImage.GetZBuffer()[imgArrayIndex] = zSum / (float)numOfHits;
         
         //If hit, perform Monte Carlo, then shade the pixel
         if (hitResultSum) {
@@ -125,17 +126,17 @@ void Render(PixelIterator& i)
                 
                 if (hitResult[index]) {
                     // Copy and Construct a new light list for monte carlo
-//                        LightList monteCarloList;
+                        LightList monteCarloList;
 
                     // Monte Carlo
-//                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
+                        MonteCarlo(monteCarloList, hitInfoArray[index], x, y, monteCarloBounces, monteCarloSampleSize);
 
-//                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
-//                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
+                        currentResult = hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], monteCarloList, 5);
+                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
                     
                     // Photon Map + MonteCarlo
-                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
-                        currentResult += MonteCarloPhoton(hitInfoArray[index], x, y, monteCarloSampleSize);
+//                        currentResult += hitInfoArray[index].node->GetMaterial()->Shade(rayArray[index], hitInfoArray[index], lights, 5);
+//                        currentResult += MonteCarloPhoton(hitInfoArray[index], x, y, monteCarloSampleSize);
                     
                     // Photon Map
 //                    currentResult = PhotonMapping(rayArray[index], hitInfoArray[index]);
@@ -422,7 +423,7 @@ Color MonteCarloPhoton(const HitInfo &hInfo, int x, int y, int numOfSamples)
         
         int actualBounces = 0;
         
-        for (int b = 0; index < (monteCarloBounces-1); b++) {
+        for (int b = 0; b < monteCarloBounces; b++) {
             // Create sample ray
             //            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
             Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
@@ -452,6 +453,99 @@ Color MonteCarloPhoton(const HitInfo &hInfo, int x, int y, int numOfSamples)
 //Monte Carlo Sampling
 void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int bounces, int numOfSamples)
 {
+//    Color cSum = Color(0.0, 0.0, 0.0);
+//
+//    for (int index = 0; index < numOfSamples; index++) {
+//        LightList currentSampleList;
+//
+////        AmbientLight* a = new AmbientLight();
+////        a->SetIntensity(Color(0.1,0.1,0.1));
+////
+////        currentSampleList.push_back(a);
+//
+////        Consider a stack implementation
+//        std::array<HitInfo, monteCarloBounces> hInfoBounceArray;
+//        std::array<Color, monteCarloBounces+1> directLightArray;
+//
+//        int actualBounces = 0;
+//
+//        // Forward Bounces
+//        for (int b = 0; b < monteCarloBounces; b++) {
+//            Color c = Color(0.0, 0.0, 0.0);
+//            hInfoBounceArray[b] = HitInfo();
+//            actualBounces++;
+//
+//            // Create sample ray
+//            //            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
+//            Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
+//            Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
+//
+//            // Trace & Shade
+//            if (Trace(sampleRay, &rootNode, hInfoBounceArray[b])) {
+//
+//                const Material* currentMaterial = hInfoBounceArray[b].node->GetMaterial();
+//
+//                c += currentMaterial->Shade(sampleRay, hInfoBounceArray[b], lights, 5);
+//
+//                // Store direct light
+//                directLightArray[b] = c;
+//
+////                c += h.node->GetMaterial()->Shade(sampleRay, h, currentSampleList, 5);
+//
+////                AmbientLight* a = new AmbientLight();
+////                a->SetIntensity(c);
+////
+////                currentSampleList.push_back(a);
+//            }
+//            else {
+//                c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+//
+//                directLightArray[b] = c;
+//
+////                AmbientLight* a = new AmbientLight();
+////                a->SetIntensity(c);
+////
+////                currentSampleList.push_back(a);
+//                break;
+//            }
+//        }
+//
+//        // Add constant ambient light
+//        directLightArray[actualBounces] = Color(0.1,0.1,0.1);
+//
+//        // Backward loop calculating indirect light
+//        for (int i = actualBounces-1; i >= 0; i--) {
+//            // Get the previous light
+//            Color prevI = directLightArray[i+1];
+//
+//            // Create Ambient Light Source
+//            LightList dummy;
+//            AmbientLight* a = new AmbientLight();
+//            a->SetIntensity(prevI);
+//            dummy.push_back(a);
+//
+//            if (hInfoBounceArray[i].node) {
+//                directLightArray[i] += hInfoBounceArray[i].node->GetMaterial()->Shade(Ray(), hInfoBounceArray[i], dummy, 5);
+//            }
+//            else {
+//                directLightArray[i] += prevI;
+//            }
+//        }
+//
+//        AmbientLight* a = new AmbientLight();
+//        a->SetIntensity(directLightArray[0]);
+//        currentSampleList.push_back(a);
+//
+//        cSum += hInfo.node->GetMaterial()->Shade(r, hInfo, currentSampleList, 5);
+//    }
+//
+//    cSum /= (float)numOfSamples;
+//
+//    AmbientLight* a = new AmbientLight();
+//    a->SetIntensity(cSum);
+//
+//    copiedList.push_back(a);
+    
     Color c = Color(0.0, 0.0, 0.0);
     
     if (bounces > 0)
@@ -461,43 +555,38 @@ void MonteCarlo(LightList &copiedList, const HitInfo &hInfo, int x, int y, int b
             // Data Structures
             HitInfo h = HitInfo();
             LightList currentSampleList;
-            
+
             // Create sample ray
-//            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
+            //            Point3 sampleOffset = SampleHemiSphere(hInfo.p, hInfo.N, 1.0);
             Point3 sampleOffset = SampleHemiSphereCosine(hInfo.p, hInfo.N, 1.0);
             Ray sampleRay = Ray(hInfo.p, sampleOffset.GetNormalized());
-            
+
             // Trace & Shade
             if (Trace(sampleRay, &rootNode, h)) {
-                if (bounces == monteCarloBounces) {
-                    MonteCarlo(currentSampleList, h, x, y, bounces-1, 1);
-                    c += h.node->GetMaterial()->Shade(sampleRay, h, currentSampleList, 5);
-                    c += h.node->GetMaterial()->Shade(sampleRay, h, lights, 5);
-                }
-                else {
-                    Color irradianceEst = Color(0.0, 0.0 ,0.0);
-                    Point3 irradianceDirection = Point3(0.0,0.0,0.0);
-                    
-                    //Estimate with photon map
-                    pMap.EstimateIrradiance<photonMapSize>(irradianceEst, irradianceDirection, photonEstRadius, h.p, &h.N, photonEllipticity);
-                    
-                    c += irradianceEst;
-                }
+                const Material* currentMaterial = h.node->GetMaterial();
+
+                MonteCarlo(currentSampleList, h, x, y, bounces-1, 1);
+                c += currentMaterial->Shade(sampleRay, h, currentSampleList, 5);
+                c += currentMaterial->Shade(sampleRay, h, lights, 5);
             }
             else {
-                c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+//                c += background.Sample(Point3((float)x/camera.imgWidth, (float)y/camera.imgHeight, 0));
+        
+                c += environment.SampleEnvironment(sampleRay.dir);
+                
+//                c += Color(0.1,0.1,0.1);
             }
         }
-        
+
         c /= (float)monteCarloSampleSize;
     }
     else {
         c = Color(0.1, 0.1, 0.1);
     }
-    
+
     AmbientLight* a = new AmbientLight();
     a->SetIntensity(c);
-    
+
     copiedList.push_back(a);
 }
 

@@ -28,7 +28,11 @@ TextureList textureList;
 
 void SpawnRenderThreads() {
     // Generate Photon Map before rendering
-    GeneratePhotonMap();
+//    GeneratePhotonMap();
+//
+//    FILE *fp=fopen("photonmap.dat","wb");
+//    fwrite(pMap.GetPhotons(),sizeof(cyPhotonMap::Photon),pMap.NumPhotons(),fp);
+//    fclose(fp);
     
     //Multi Thread Rendering
     PixelIterator i = PixelIterator();
@@ -52,10 +56,6 @@ void SpawnRenderThreads() {
     }
     
     //Output Image
-    FILE *fp=fopen("photonmap.dat","wb");
-    fwrite(pMap.GetPhotons(),sizeof(cyPhotonMap::Photon),pMap.NumPhotons(),fp);
-    fclose(fp);
-    
     renderImage.SaveImage("Result.png");
     renderImage.ComputeZBufferImage();
     renderImage.SaveZImage("ZBuffer.png");
@@ -81,7 +81,7 @@ int main(int argc, const char* argv[])
     }
     //Load default scene if no sceneFile provided
     else {
-        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Project13/scene.xml");
+        LoadScene("/Users/Peter/GitRepos/RayTracer-Utah/SceneFiles/Teapot/scene2.xml");
     }
     
     ShowViewport();
